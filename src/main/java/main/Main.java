@@ -27,7 +27,7 @@ public class Main extends Application {
         // set title for app
         primaryStage.setTitle("Windows Shortcut Manipulator");
         // set image for app
-        // rimaryStage.getIcons().add(new Image("/images/Mp3TagGenerator.png"));
+        primaryStage.getIcons().add(new Image("/images/WindowsShortcutManipulator.png"));
         // create scene
         Scene scene = new Scene(rootNode);
         mainScreenController.setScene(scene);

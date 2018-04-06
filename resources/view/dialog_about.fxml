@@ -11,24 +11,24 @@
    <left>
       <ImageView fitHeight="345.0" fitWidth="417.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER">
          <image>
-            <Image url="@../images/Mp3TagGenerator.png" />
+            <Image url="@../images/WindowsShortcutManipulator.png" />
          </image>
       </ImageView>
    </left>
    <right>
       <VBox alignment="CENTER" prefHeight="343.0" prefWidth="216.0" spacing="35.0" BorderPane.alignment="CENTER">
          <children>
-            <Label fx:id="appNameLabel" text="Mp3 Tag Generator">
+            <Label fx:id="appNameLabel" text="Windows Shortcut Manipulator">
                <font>
-                  <Font size="20.0" />
+                  <Font size="15.0" />
                </font></Label>
             <Label fx:id="appVersionLabel" text="Version 2018.03.23">
                <font>
-                  <Font size="18.0" />
+                  <Font size="15.0" />
                </font></Label>
             <Label fx:id="copyrightLabel" text="Copyright© NikMal 2018">
                <font>
-                  <Font size="16.0" />
+                  <Font size="15.0" />
                </font></Label>
          </children></VBox>
    </right>
