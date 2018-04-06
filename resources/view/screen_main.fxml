@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckMenuItem?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.TextFlow?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="653.0" prefWidth="1130.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.java.controllers.MainScreenController">
+   <top>
+      <MenuBar prefWidth="966.0" BorderPane.alignment="CENTER">
+        <menus>
+          <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem fx:id="openFilesMenuItem" mnemonicParsing="false" onAction="#openFiles" text="Dodaj datoteke..." />
+                  <MenuItem fx:id="openFolderMenuItem" mnemonicParsing="false" onAction="#openFolder" text="Dodaj direktorijum..." />
+            </items>
+          </Menu>
+          <Menu fx:id="languageMenu" mnemonicParsing="false" text="Language">
+               <items>
+                  <CheckMenuItem fx:id="englishMenuItem" mnemonicParsing="false" onAction="#englishMenuItemCheckChanged" text="English" />
+                  <CheckMenuItem fx:id="serbianMenuItem" mnemonicParsing="false" onAction="#serbianMenuItemCheckChanged" text="Serbian" />
+               </items>
+          </Menu>
+            <Menu fx:id="helpMenu" mnemonicParsing="false" text="Help">
+              <items>
+                <MenuItem fx:id="aboutMenuItem" mnemonicParsing="false" onAction="#openAboutDialog" text="About" />
+              </items>
+            </Menu>
+        </menus>
+      </MenuBar>
+   </top>
+   <bottom>
+      <ProgressBar fx:id="progressBar" maxHeight="80.0" maxWidth="561.0" minHeight="80.0" minWidth="561.0" prefHeight="80.0" prefWidth="561.0" progress="0.0" BorderPane.alignment="CENTER">
+         <padding>
+            <Insets bottom="30.0" top="30.0" />
+         </padding>
+      </ProgressBar>
+   </bottom>
+   <center>
+      <GridPane BorderPane.alignment="CENTER">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints maxHeight="136.0" minHeight="109.0" prefHeight="126.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="422.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <GridPane>
+              <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="170.0" minWidth="100.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="110.0" minWidth="100.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <GridPane nodeOrientation="LEFT_TO_RIGHT" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.valignment="CENTER">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" percentHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label fx:id="chooseAlphabetLabel" text="Odaberite jezik:" GridPane.halignment="LEFT" GridPane.valignment="CENTER">
+                           <GridPane.margin>
+                              <Insets left="10.0" top="2.0" />
+                           </GridPane.margin>
+                        </Label>
+                        <VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0" GridPane.rowIndex="1">
+                           <children>
+                              <RadioButton fx:id="cyrillicRadioButton" mnemonicParsing="false" selected="true" text="Ćirilica">
+                                 <toggleGroup>
+                                    <ToggleGroup fx:id="lang" />
+                                 </toggleGroup>
+                              </RadioButton>
+                              <RadioButton fx:id="latinRadioButton" mnemonicParsing="false" text="Latinica" toggleGroup="$lang" />
+                           </children>
+                           <GridPane.margin>
+                              <Insets left="10.0" />
+                           </GridPane.margin>
+                           <padding>
+                              <Insets top="2.0" />
+                           </padding>
+                        </VBox>
+                     </children>
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <padding>
+                        <Insets bottom="11.0" />
+                     </padding>
+                     <GridPane.margin>
+                        <Insets />
+                     </GridPane.margin>
+                  </GridPane>
+                  <BorderPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="5">
+                     <padding>
+                        <Insets bottom="5.0" left="15.0" right="5.0" />
+                     </padding>
+                     <center>
+                        <ScrollPane fx:id="scrollPane" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                           <content>
+                              <TextFlow fx:id="consoleTextFlow" />
+                           </content>
+                        </ScrollPane>
+                     </center>
+                     <top>
+                        <BorderPane prefHeight="14.0" prefWidth="343.0" BorderPane.alignment="CENTER">
+                           <left>
+                              <Label fx:id="consoleLabel" text="Konzola" BorderPane.alignment="CENTER" />
+                           </left>
+                           <right>
+                              <Button fx:id="clearConsoleButton" maxHeight="19.0" maxWidth="20.0" minHeight="19.0" minWidth="20.0" mnemonicParsing="false" onAction="#clearConsole" prefHeight="19.0" prefWidth="20.0" BorderPane.alignment="CENTER">
+                                 <graphic>
+                                    <ImageView fitHeight="18.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/Clear.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                              </Button>
+                           </right>
+                        </BorderPane>
+                     </top>
+                  </BorderPane>
+                  <Button fx:id="saveButton" contentDisplay="TOP" mnemonicParsing="false" prefHeight="48.0" prefWidth="95.0" text="Pokreni" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                     <graphic>
+                        <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../images/PlayPause.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+                  <Button fx:id="stopButton" contentDisplay="TOP" disable="true" mnemonicParsing="false" prefHeight="52.0" prefWidth="94.0" text="Zaustavi" GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.valignment="CENTER">
+                     <graphic>
+                        <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../images/Stop.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+                  <GridPane prefHeight="127.0" prefWidth="256.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" percentHeight="30.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <VBox prefHeight="79.0" prefWidth="265.0" spacing="5.0" GridPane.rowIndex="1">
+                           <children>
+                              <RadioButton fx:id="artistYearTitleRadButton" mnemonicParsing="false" selected="true" text="Artist - Year - Title">
+                                 <toggleGroup>
+                                    <ToggleGroup fx:id="pattern" />
+                                 </toggleGroup></RadioButton>
+                              <RadioButton fx:id="artistLiveYearTitleRadButton" mnemonicParsing="false" text="Artist - Live - Year - Title" toggleGroup="$pattern" />
+                              <RadioButton fx:id="artistTitleRadButton" mnemonicParsing="false" text="Artist - Title" toggleGroup="$pattern" />
+                              <RadioButton fx:id="titleRadButton" mnemonicParsing="false" text="Title" toggleGroup="$pattern" />
+                           </children>
+                           <GridPane.margin>
+                              <Insets left="10.0" />
+                           </GridPane.margin>
+                        </VBox>
+                        <Label fx:id="choosePatternLabel" text="Odaberite patern:" GridPane.halignment="LEFT" GridPane.valignment="CENTER">
+                           <GridPane.margin>
+                              <Insets left="10.0" />
+                           </GridPane.margin>
+                        </Label>
+                     </children>
+                  </GridPane>
+                  <Button fx:id="generateButton" contentDisplay="TOP" layoutX="393.0" layoutY="29.0" mnemonicParsing="false" prefHeight="48.0" prefWidth="95.0" text="Generiši" GridPane.columnIndex="2">
+                     <graphic>
+                        <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../images/GenerateTags.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+               </children>
+            </GridPane>
+            <TableView fx:id="tableView" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
+              <columns>
+                <TableColumn fx:id="fileName" editable="false" prefWidth="373.99998474121094" text="Naziv fajla" />
+                <TableColumn fx:id="trackArtist" editable="false" prefWidth="221.0" text="Autor" />
+                  <TableColumn fx:id="trackName" editable="false" prefWidth="231.0" text="Naziv pesme" />
+                  <TableColumn fx:id="trackYear" editable="false" prefWidth="100.0" style="-fx-alignment: CENTER;" text="Godina izdanja" />
+              </columns>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+            </TableView>
+         </children>
+      </GridPane>
+   </center>
+</BorderPane>
