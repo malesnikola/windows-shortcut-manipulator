@@ -69,6 +69,42 @@ public class MainScreenController {
     @FXML
     private ProgressBar progressBar;
 
+    // buttons
+    @FXML
+    private Button checkAvailabilityButton;
+    @FXML
+    private Button checkDuplicatesButton;
+    @FXML
+    private Button changeRootButton;
+    @FXML
+    private Button createCopiesButton;
+    @FXML
+    private Button chooseDirectoryButton;
+
+    // choice box
+    @FXML
+    private ChoiceBox<String> ChooseRootChoiceBox;
+
+    // text field
+    @FXML
+    private TextField newRootTextField;
+    @FXML
+    private TextField rootForCopiesTextField;
+
+    // labels
+    @FXML
+    private Label changeRootLabel;
+    @FXML
+    private Label chooseRootLabel;
+    @FXML
+    private Label newRootLabel;
+    @FXML
+    private Label createCopiesLabel;
+    @FXML
+    private Label directoryLabel;
+    @FXML
+    private Label consoleLabel;
+
     /**
      * Get resource bundle of application.
      * @return Returns chosen ResourceBundle.
@@ -107,6 +143,15 @@ public class MainScreenController {
         englishMenuItem.setText(getLocalizedString("menu.item.english.text"));
         serbianMenuItem.setText(getLocalizedString("menu.item.serbian.text"));
         aboutMenuItem.setText(getLocalizedString("menu.item.about.text"));
+
+        // labels
+        changeRootLabel.setText(getLocalizedString("label.changeRoot.text"));
+        chooseRootLabel.setText(getLocalizedString("label.chooseRoot.text"));
+        newRootLabel.setText(getLocalizedString("label.newRoot.text"));
+        createCopiesLabel.setText(getLocalizedString("label.createCopies.text"));
+        directoryLabel.setText(getLocalizedString("label.directory.text"));
+        consoleLabel.setText(getLocalizedString("label.console.text"));
+
     }
 
     @FXML
