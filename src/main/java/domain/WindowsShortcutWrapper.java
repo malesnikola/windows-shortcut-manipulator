@@ -9,17 +9,19 @@ import java.text.ParseException;
 
 public class WindowsShortcutWrapper extends WindowsShortcut {
 
+    private String filePath;
     private FileState fileState;
     private ShortcutActionState shortcutActionState;
 
     public WindowsShortcutWrapper(File file) throws IOException, ParseException {
         super(file);
+        shortcutActionState = ShortcutActionState.NONE;
+        fileState = FileState.UNKNOWN;
+        this.filePath = file.getPath();
     }
 
     public WindowsShortcutWrapper(String filePath) throws IOException, ParseException {
-        super(new File(filePath));
-        shortcutActionState = ShortcutActionState.NONE;
-        fileState = FileState.UNKNOWN;
+        this(new File(filePath));
     }
 
     public FileState getFileState() {
@@ -36,5 +38,9 @@ public class WindowsShortcutWrapper extends WindowsShortcut {
 
     public void setShortcutActionState(ShortcutActionState shortcutActionState) {
         this.shortcutActionState = shortcutActionState;
+    }
+
+    public String getFilePath() {
+        return filePath;
     }
 }

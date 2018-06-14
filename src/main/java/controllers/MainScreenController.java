@@ -21,6 +21,8 @@ import javafx.stage.*;
 import javafx.util.Callback;
 import main.java.dialogs.ProgressForm;
 import main.java.domain.FailedFileDetails;
+import main.java.domain.WindowsShortcutDetails;
+import main.java.model.WindowsShortcutModel;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -28,7 +30,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MainScreenController {
+public class MainScreenController implements WindowsShortcutModel.WindowsShortcutObserver {
     private static Logger logger = Logger.getLogger(MainScreenController.class);
 
     private static ResourceBundle resourceBundle;
@@ -104,6 +106,19 @@ public class MainScreenController {
     private Label directoryLabel;
     @FXML
     private Label consoleLabel;
+
+    // data table
+    private ObservableList<WindowsShortcutDetails> tableData;
+    @FXML
+    private TableView<WindowsShortcutDetails> tableView;
+    @FXML
+    private TableColumn<WindowsShortcutDetails, String> shortcutFilePathColumn;
+    @FXML
+    private TableColumn<WindowsShortcutDetails, String> originalFilePathColumn;
+    @FXML
+    private TableColumn<WindowsShortcutDetails, String> availabilityColumn;
+    @FXML
+    private TableColumn<WindowsShortcutDetails, String> actionColumn;
 
     /**
      * Get resource bundle of application.
@@ -321,4 +336,28 @@ public class MainScreenController {
 
     }
 
+    @Override
+    public void onImportedFilesChanged() {
+
+    }
+
+    @Override
+    public void onAnalysedAvailability() {
+
+    }
+
+    @Override
+    public void onAnalysedCopies() {
+
+    }
+
+    @Override
+    public void onChangedRoot() {
+
+    }
+
+    @Override
+    public void onCreateCopies() {
+
+    }
 }
