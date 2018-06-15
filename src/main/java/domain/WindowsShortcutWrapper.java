@@ -18,6 +18,13 @@ public class WindowsShortcutWrapper extends WindowsShortcut {
         shortcutActionState = ShortcutActionState.NONE;
         fileState = FileState.UNKNOWN;
         this.filePath = file.getPath();
+        // little hack:
+        //  because my file names is serbian latin (best charset for that is "windows-1250"),
+        //  and some of my last folders begin with 'Ω' (because I always want for them to be at the end).
+        //  I couldn't find solution how to read serbian latin character with 'Ω' character, so I manually changed all '?' with 'Ω'
+        if (real_file.contains("?")) {
+            real_file = real_file.replaceAll("\\?", "Ω");
+        }
     }
 
     public WindowsShortcutWrapper(String filePath) throws IOException, ParseException {
