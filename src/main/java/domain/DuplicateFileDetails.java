@@ -1,5 +1,7 @@
 package main.java.domain;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.control.CheckBox;
@@ -7,13 +9,12 @@ import javafx.scene.control.CheckBox;
 public class DuplicateFileDetails {
     private final StringProperty shortcutFilePath;      // file path for ".lnk" file
     private final StringProperty originalFilePath;      // file path of original file
-    private CheckBox select;
+    private BooleanProperty isSelected;
 
     public DuplicateFileDetails(String shortcutFilePath, String originalFilePath, boolean isSelected) {
         this.shortcutFilePath = new SimpleStringProperty(shortcutFilePath);
         this.originalFilePath = new SimpleStringProperty(originalFilePath);
-        select = new CheckBox();
-        select.setSelected(isSelected);
+        this.isSelected = new SimpleBooleanProperty(isSelected);
     }
 
     public static DuplicateFileDetails deserialize(DuplicateFileInfo duplicateFileInfo) {
@@ -48,11 +49,15 @@ public class DuplicateFileDetails {
         this.originalFilePath.set(originalFilePath);
     }
 
-    public CheckBox getSelect() {
-        return select;
+    public boolean isIsSelected() {
+        return isSelected.get();
     }
 
-    public void setSelect(CheckBox select) {
-        this.select = select;
+    public BooleanProperty isSelectedProperty() {
+        return isSelected;
+    }
+
+    public void setIsSelected(boolean isSelected) {
+        this.isSelected.set(isSelected);
     }
 }
