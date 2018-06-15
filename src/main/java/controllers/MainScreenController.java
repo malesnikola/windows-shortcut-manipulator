@@ -20,15 +20,14 @@ import javafx.scene.text.TextFlow;
 import javafx.stage.*;
 import javafx.util.Callback;
 import main.java.dialogs.ProgressForm;
-import main.java.domain.FailedFileDetails;
-import main.java.domain.WindowsShortcutDetails;
-import main.java.domain.WindowsShortcutWrapper;
+import main.java.domain.*;
 import main.java.enums.FileState;
 import main.java.enums.ShortcutActionState;
 import main.java.enums.WindowsShortcutModelState;
 import main.java.model.WindowsShortcutModel;
 import main.java.util.Constants;
 import main.java.workers.CheckAvailabilityWorker;
+import main.java.workers.CheckDuplicatesWorker;
 import main.java.workers.ImportFilesWorker;
 import org.apache.log4j.Logger;
 
@@ -482,8 +481,26 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         // open progress dialog
         progressForm.getDialogStage().show();
 
-        // saveFiles new thread
+        // start new thread
         new Thread(checkAvailabilityWorker).start();
+    }
+
+    public void checkDuplicates() {
+        ProgressForm progressForm = new ProgressForm(scene);
+
+        Task checkDuplicatesWorker = new CheckDuplicatesWorker(windowsShortcutModel, progressForm);
+
+        // binds progress of progress form to progress of task:
+        progressForm.activateProgressBar(checkDuplicatesWorker);
+
+        // disable all elements on scene
+        scene.getRoot().getChildrenUnmodifiable().forEach(c -> c.setDisable(true));
+
+        // open progress dialog
+        progressForm.getDialogStage().show();
+
+        // start new thread
+        new Thread(checkDuplicatesWorker).start();
     }
 
     /**
@@ -550,6 +567,9 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
 
                 break;
             case CHECKED_DUPLICATES:
+                Text checkedDuplicatesSuccessText = new Text(currentTime + getLocalizedString("files.checkedDuplicates.successfully") + "\n");
+                checkedDuplicatesSuccessText.setFill(Color.GREEN);
+                consoleTextFlow.getChildren().addAll(checkedDuplicatesSuccessText);
 
                 break;
             case CHANGED_ROOTS:
@@ -619,8 +639,26 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
     }
 
     @Override
-    public void onAnalysedCopies() {
-
+    public void onCheckedCopies() {
+        Platform.runLater(() -> {
+            if (windowsShortcutModel.ifSomeFilesAreDuplicates()) {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/dialog_remove_copies.fxml"));
+                try {
+                    Parent rootNode = loader.load();
+                    Stage stage = new Stage();
+                    stage.setScene(new Scene(rootNode));
+                    stage.setTitle(getLocalizedString("dialog.removeCopies.title"));
+                    stage.initStyle(StageStyle.UTILITY);
+                    stage.initModality(Modality.APPLICATION_MODAL);
+                    stage.setResizable(false);
+                    stage.show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                addInfoOnConsole();
+            }
+        });
     }
 
     @Override

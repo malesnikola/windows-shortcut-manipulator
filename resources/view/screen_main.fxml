@@ -97,7 +97,7 @@
                         <Insets />
                      </GridPane.margin>
                      <children>
-                        <Button fx:id="checkDuplicatesButton" contentDisplay="TOP" mnemonicParsing="false" prefHeight="96.0" prefWidth="118.0" text="Proveri duplikate" textAlignment="CENTER">
+                        <Button fx:id="checkDuplicatesButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#checkDuplicates" prefHeight="96.0" prefWidth="118.0" text="Proveri duplikate" textAlignment="CENTER">
                            <graphic>
                               <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true">
                                  <image>

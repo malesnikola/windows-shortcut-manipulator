@@ -1,10 +1,12 @@
 package main.java.model;
 
+import main.java.domain.DuplicateFileInfo;
 import main.java.domain.FailedFileDetails;
 import main.java.domain.WindowsShortcutWrapper;
 import main.java.enums.FileState;
 import main.java.enums.WindowsShortcutModelState;
 import main.java.workers.CheckAvailabilityWorker;
+import main.java.workers.CheckDuplicatesWorker;
 import main.java.workers.ImportFilesWorker;
 import org.apache.log4j.Logger;
 
@@ -31,6 +33,11 @@ public class WindowsShortcutModel {
      * Contains all imported ".lnk" files. Key is file path (for ".lnk" file), value is WindowsShortcutWrapper.
      */
     private Map<String, WindowsShortcutWrapper> importedFiles = new HashMap<>();
+
+    /**
+     * List of duplicate files (files with the same target file)
+     */
+    private List<DuplicateFileInfo> duplicateFiles = new LinkedList<>();
 
     /**
      * Contains list of all files (with error details) which cannot be imported.
@@ -66,6 +73,14 @@ public class WindowsShortcutModel {
      */
     public Map<String, WindowsShortcutWrapper> getImportedFiles() {
         return importedFiles;
+    }
+
+    public List<DuplicateFileInfo> getDuplicateFiles() {
+        return duplicateFiles;
+    }
+
+    public boolean ifSomeFilesAreDuplicates() {
+        return !duplicateFiles.isEmpty();
     }
 
     public List<FailedFileDetails> getLastFailedLoadingFiles() {
@@ -186,6 +201,31 @@ public class WindowsShortcutModel {
         }
     }
 
+    public void checkDuplicates(CheckDuplicatesWorker worker) {
+        lastModelState = WindowsShortcutModelState.CHECKED_DUPLICATES;
+
+        duplicateFiles.clear();
+        Map<String, String> foundTargetFiles = new HashMap<>();
+        AtomicInteger progress = new AtomicInteger();
+        for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
+            String originalFilePath = shortcut.getRealFilename();
+            String shortcutFilePath = shortcut.getFilePath();
+
+            if (foundTargetFiles.containsKey(originalFilePath)){
+                duplicateFiles.add(new DuplicateFileInfo(foundTargetFiles.get(originalFilePath), originalFilePath));
+                duplicateFiles.add(new DuplicateFileInfo(shortcutFilePath, originalFilePath));
+            } else {
+                foundTargetFiles.put(originalFilePath, shortcutFilePath);
+            }
+
+            if (worker != null) {
+                worker.updateProgress(progress.incrementAndGet(), importedFiles.size());
+            }
+        }
+
+        observers.forEach(WindowsShortcutObserver::onCheckedCopies);
+    }
+
     public void registerObserver(WindowsShortcutObserver observer) {
         observers.add(observer);
     }
@@ -199,7 +239,7 @@ public class WindowsShortcutModel {
 
         void onCheckedAvailability();
 
-        void onAnalysedCopies();
+        void onCheckedCopies();
 
         void onChangedRoot();
 
