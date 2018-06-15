@@ -2,7 +2,9 @@ package main.java.model;
 
 import main.java.domain.FailedFileDetails;
 import main.java.domain.WindowsShortcutWrapper;
+import main.java.enums.FileState;
 import main.java.enums.WindowsShortcutModelState;
+import main.java.workers.CheckAvailabilityWorker;
 import main.java.workers.ImportFilesWorker;
 import org.apache.log4j.Logger;
 
@@ -82,6 +84,18 @@ public class WindowsShortcutModel {
         return lastModelState;
     }
 
+    private void populateListWithActualFiles(List<File> originalFiles, List<File> actualFiles) {
+        for (File originalFile : originalFiles) {
+            if (originalFile.isDirectory()) {
+                File[] childrenFiles = originalFile.listFiles();
+                populateListWithActualFiles(Arrays.asList(childrenFiles), actualFiles);
+            }
+            else {
+                actualFiles.add(originalFile);
+            }
+        }
+    }
+
     /**
      * Import ".lnk" files.
      * @param files List of files.
@@ -96,7 +110,10 @@ public class WindowsShortcutModel {
 
             AtomicInteger progress = new AtomicInteger();
 
-            files.stream().forEach(file -> {
+            List<File> actualFiles = new LinkedList<>();
+            populateListWithActualFiles(files, actualFiles);
+
+            actualFiles.stream().forEach(file -> {
                 String filePath = file.getPath();
                 if (!importedFiles.containsKey(filePath)) {
                     try {
@@ -112,7 +129,7 @@ public class WindowsShortcutModel {
                 }
 
                 if (worker != null) {
-                    worker.updateProgress(progress.incrementAndGet());
+                    worker.updateProgress(progress.incrementAndGet(), actualFiles.size());
                 }
             });
 
@@ -144,6 +161,31 @@ public class WindowsShortcutModel {
         }
     }
 
+    public void checkAvailability(CheckAvailabilityWorker worker) {
+        lastModelState = WindowsShortcutModelState.CHECKED_AVAILABILITY;
+
+        AtomicInteger progress = new AtomicInteger();
+
+        for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
+            String originalFilePath = shortcut.getRealFilename();
+            File originalFile = new File(originalFilePath);
+            if (originalFile.exists()) {
+                shortcut.setFileState(FileState.AVAILABLE);
+            } else {
+                shortcut.setFileState(FileState.UNAVAILABLE);
+            }
+
+            if (worker != null) {
+                worker.updateProgress(progress.incrementAndGet(), importedFiles.size());
+            }
+        }
+
+        if (!importedFiles.isEmpty()) {
+            // notify observers if at least one file is checked
+            observers.forEach(WindowsShortcutObserver::onCheckedAvailability);
+        }
+    }
+
     public void registerObserver(WindowsShortcutObserver observer) {
         observers.add(observer);
     }
@@ -155,7 +197,7 @@ public class WindowsShortcutModel {
     public interface WindowsShortcutObserver {
         void onImportedFilesChanged();
 
-        void onAnalysedAvailability();
+        void onCheckedAvailability();
 
         void onAnalysedCopies();
 

@@ -4,19 +4,12 @@ import javafx.concurrent.Task;
 import main.java.dialogs.ProgressForm;
 import main.java.model.WindowsShortcutModel;
 
-import java.io.File;
-import java.util.List;
-
-public class ImportFilesWorker extends Task<Boolean>{
-
+public class CheckAvailabilityWorker extends Task<Boolean> {
     private WindowsShortcutModel windowsShortcutModel;
 
-    private List<File> files;
-
-    public ImportFilesWorker(WindowsShortcutModel WindowsShortcutModel, ProgressForm progressForm, List<File> files) {
+    public CheckAvailabilityWorker(WindowsShortcutModel WindowsShortcutModel, ProgressForm progressForm) {
         super();
         this.windowsShortcutModel = WindowsShortcutModel;
-        this.files = files;
         this.setOnCancelled(event -> {
             progressForm.closeDialogStage();
         });
@@ -28,7 +21,7 @@ public class ImportFilesWorker extends Task<Boolean>{
 
     @Override
     protected Boolean call() throws Exception {
-        windowsShortcutModel.importFiles(files, this);
+        windowsShortcutModel.checkAvailability(this);
 
         return true;
     }

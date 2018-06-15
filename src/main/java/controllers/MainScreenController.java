@@ -25,8 +25,10 @@ import main.java.domain.WindowsShortcutDetails;
 import main.java.domain.WindowsShortcutWrapper;
 import main.java.enums.FileState;
 import main.java.enums.ShortcutActionState;
+import main.java.enums.WindowsShortcutModelState;
 import main.java.model.WindowsShortcutModel;
 import main.java.util.Constants;
+import main.java.workers.CheckAvailabilityWorker;
 import main.java.workers.ImportFilesWorker;
 import org.apache.log4j.Logger;
 
@@ -466,6 +468,24 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         }
     }
 
+    public void checkAvailability() {
+        ProgressForm progressForm = new ProgressForm(scene);
+
+        Task checkAvailabilityWorker = new CheckAvailabilityWorker(windowsShortcutModel, progressForm);
+
+        // binds progress of progress form to progress of task:
+        progressForm.activateProgressBar(checkAvailabilityWorker);
+
+        // disable all elements on scene
+        scene.getRoot().getChildrenUnmodifiable().forEach(c -> c.setDisable(true));
+
+        // open progress dialog
+        progressForm.getDialogStage().show();
+
+        // saveFiles new thread
+        new Thread(checkAvailabilityWorker).start();
+    }
+
     /**
      * Clear console.
      */
@@ -504,6 +524,45 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         String currentTime = ((hours < 10) ? ("0" + hours) : hours) + ":"
                 + ((minutes < 10) ? ("0" + minutes) : minutes) + ":"
                 + ((seconds < 10) ? ("0" + seconds) : seconds) + " - ";
+
+        WindowsShortcutModelState lastModelState = windowsShortcutModel.getLastModelState();
+        switch (lastModelState) {
+            case IMPORTED:
+                if (windowsShortcutModel.getLastFailedLoadingFiles().size() > 0) {
+                    addErrorsOnConsole(currentTime,"files.cannot.be.imported", windowsShortcutModel.getLastFailedLoadingFiles());
+                } else {
+                    Text importFilesSuccessText = new Text(currentTime + getLocalizedString("files.imported.successfully") + "\n");
+                    importFilesSuccessText.setFill(Color.BLUE);
+                    consoleTextFlow.getChildren().addAll(importFilesSuccessText);
+                }
+
+                break;
+            case REMOVED:
+                Text removedFilesSuccessText = new Text(currentTime + getLocalizedString("files.removed.successfully") + "\n");
+                removedFilesSuccessText.setFill(Color.ORANGE);
+                consoleTextFlow.getChildren().addAll(removedFilesSuccessText);
+
+                break;
+            case CHECKED_AVAILABILITY:
+                Text checkedAvailabilitySuccessText = new Text(currentTime + getLocalizedString("files.checkedAvailability.successfully") + "\n");
+                checkedAvailabilitySuccessText.setFill(Color.GREEN);
+                consoleTextFlow.getChildren().addAll(checkedAvailabilitySuccessText);
+
+                break;
+            case CHECKED_DUPLICATES:
+
+                break;
+            case CHANGED_ROOTS:
+
+                break;
+
+            case CREATED_COPIES:
+
+                break;
+
+            default:
+                break;
+        }
 
         scrollPane.setVvalue(1.0); // 1.0 means 100% at the bottom
     }
@@ -552,8 +611,11 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
     }
 
     @Override
-    public void onAnalysedAvailability() {
-
+    public void onCheckedAvailability() {
+        Platform.runLater(() -> {
+            updateTable();
+            addInfoOnConsole();
+        });
     }
 
     @Override

@@ -146,7 +146,7 @@
                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
-                        <Button fx:id="checkAvailabilityButton" contentDisplay="TOP" mnemonicParsing="false" prefHeight="96.0" prefWidth="118.0" text="Proveri dostupnost" textAlignment="CENTER">
+                        <Button fx:id="checkAvailabilityButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#checkAvailability" prefHeight="96.0" prefWidth="118.0" text="Proveri dostupnost" textAlignment="CENTER">
                            <graphic>
                               <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
