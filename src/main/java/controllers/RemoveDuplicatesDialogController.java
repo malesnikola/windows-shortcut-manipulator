@@ -12,7 +12,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
-import javafx.stage.Modality;
 import javafx.stage.StageStyle;
 import main.java.domain.*;
 import main.java.model.WindowsShortcutModel;
@@ -41,7 +40,8 @@ public class RemoveDuplicatesDialogController implements WindowsShortcutModel.Ma
     @FXML
     private TableColumn<DuplicateFileDetails, String> originalFilePathColumn;
 
-    private TableColumn chosenSortingColumn;
+    private TableColumn chosenSortingColumn1;
+    private TableColumn chosenSortingColumn2;
 
     // label
     @FXML
@@ -124,14 +124,17 @@ public class RemoveDuplicatesDialogController implements WindowsShortcutModel.Ma
         // save user selected column for sorting
         tableView.setOnSort(event -> {
             if (tableView.getSortOrder().size() == 1) {
-                chosenSortingColumn = tableView.getSortOrder().get(0);
+                chosenSortingColumn1 = tableView.getSortOrder().get(0);
+                if (tableView.getSortOrder().size() > 1) {
+                    chosenSortingColumn2 = tableView.getSortOrder().get(1);
+                }
             }
         });
 
         // by default sorting column is original file name and shortcut file name
-        tableView.getSortOrder().add(originalFilePathColumn);
         shortcutFilePathColumn.setSortType(TableColumn.SortType.ASCENDING);
-        chosenSortingColumn = shortcutFilePathColumn;
+        chosenSortingColumn1 = originalFilePathColumn;
+        chosenSortingColumn2 = shortcutFilePathColumn;
 
         updateTable();
     }
@@ -164,7 +167,9 @@ public class RemoveDuplicatesDialogController implements WindowsShortcutModel.Ma
         tableView.setItems(tableData);
 
         // sort table
-        tableView.getSortOrder().add(chosenSortingColumn);
+        tableView.getSortOrder().clear();
+        tableView.getSortOrder().add(chosenSortingColumn1);
+        tableView.getSortOrder().add(chosenSortingColumn2);
         tableView.sort();
     }
 
