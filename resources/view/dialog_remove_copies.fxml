@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="991.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.java.controllers.RemoveDuplicatesDialogController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="1130.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.java.controllers.RemoveDuplicatesDialogController">
    <bottom>
       <GridPane maxHeight="60.0" maxWidth="500.0" minHeight="60.0" minWidth="500.0" prefHeight="60.0" prefWidth="500.0" BorderPane.alignment="CENTER">
         <columnConstraints>
@@ -48,9 +48,9 @@
    <center>
       <TableView fx:id="tableView" prefHeight="315.0" prefWidth="600.0" BorderPane.alignment="CENTER">
         <columns>
-            <TableColumn fx:id="selectionColumn" prefWidth="75.0" text="Select" />
-          <TableColumn fx:id="shortcutFilePathColumn" prefWidth="444.99998474121094" text="Shortcut file" />
-          <TableColumn fx:id="originalFilePathColumn" minWidth="0.0" prefWidth="466.0" text="Real file" />
+            <TableColumn fx:id="selectionColumn" prefWidth="94.99999237060547" text="Select" />
+          <TableColumn fx:id="shortcutFilePathColumn" prefWidth="511.0" text="Shortcut file" />
+          <TableColumn fx:id="originalFilePathColumn" minWidth="0.0" prefWidth="511.0" text="Real file" />
         </columns>
       </TableView>
    </center>

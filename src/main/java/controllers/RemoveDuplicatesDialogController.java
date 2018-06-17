@@ -136,6 +136,7 @@ public class RemoveDuplicatesDialogController implements WindowsShortcutModel.Ma
         chosenSortingColumn1 = originalFilePathColumn;
         chosenSortingColumn2 = shortcutFilePathColumn;
 
+        populateUIWithLocalizedStrings();
         updateTable();
     }
 
