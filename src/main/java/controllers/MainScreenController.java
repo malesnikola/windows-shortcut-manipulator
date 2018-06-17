@@ -348,6 +348,20 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         tableView.getColumns().addAll(availabilityColumn, actionColumn);
     }
 
+    private void setDropdownParentList() {
+        List<String> parents = windowsShortcutModel.getMinimumMatchingParents();
+        ObservableList<String> choiceBoxData = FXCollections.observableArrayList();
+        if (!parents.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (String parent : parents) {
+                sb.append(parent + File.separator);
+                choiceBoxData.add(sb.toString());
+            }
+        }
+
+        ChooseRootChoiceBox.setItems(choiceBoxData);
+    }
+
     /**
      * Update table view with data.
      */
@@ -634,6 +648,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
     @Override
     public void onImportedFilesChanged() {
         Platform.runLater(() -> {
+            setDropdownParentList();
             updateTable();
             addInfoOnConsole();
         });

@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 public class WindowsShortcutModel {
     private static Logger logger = Logger.getLogger(WindowsShortcutModel.class);
@@ -258,6 +259,40 @@ public class WindowsShortcutModel {
 
     public void finishRemoveDuplicates() {
         lastModelState = WindowsShortcutModelState.REMOVED_DUPLICATES;
+    }
+
+    public List<String> getMinimumMatchingParents() {
+        List<String> response = new LinkedList<String>();
+        for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
+            String path = shortcut.getFilePath();
+            String patternSeparator = Pattern.quote(System.getProperty("file.separator"));
+            String[] splittedPath = path.split(patternSeparator);
+
+            if (response.isEmpty()) {
+                response = new LinkedList<String>(Arrays.asList(splittedPath));
+                response.remove(response.size() - 1);
+            } else {
+                Iterator<String> iterator = response.iterator();
+                for (int cnt = 0; (cnt < splittedPath.length) && iterator.hasNext(); cnt++) {
+                    String parent = iterator.next();
+                    if (!splittedPath[cnt].equals(parent)) {
+                        iterator.remove();
+                        while (iterator.hasNext()) {
+                            iterator.next();
+                            iterator.remove();
+                        }
+
+                        break;
+                    }
+                }
+
+                if (response.isEmpty()) {
+                    return response;
+                }
+            }
+        }
+
+        return response;
     }
 
     private boolean tryToRemoveFile(String filePath) {
