@@ -3,6 +3,7 @@ package main.java.enums;
 public enum FileState {
     UNKNOWN ("unknown"),
     AVAILABLE ("available"),
+    CASE_SENSITIVE ("case_sensitive"),
     UNAVAILABLE ("unavailable");
 
     private String stateText;

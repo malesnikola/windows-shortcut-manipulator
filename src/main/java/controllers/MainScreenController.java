@@ -281,6 +281,9 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
                                 case AVAILABLE:
                                     this.setTextFill(Color.GREEN);
                                     break;
+                                case CASE_SENSITIVE:
+                                    this.setTextFill(Color.BLUE);
+                                    break;
                                 case UNAVAILABLE:
                                     this.setTextFill(Color.RED);
                                     break;

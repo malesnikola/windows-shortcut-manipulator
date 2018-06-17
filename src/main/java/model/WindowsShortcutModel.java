@@ -1,5 +1,6 @@
 package main.java.model;
 
+import javafx.fxml.FXML;
 import main.java.domain.FailedFileDetails;
 import main.java.domain.WindowsShortcutWrapper;
 import main.java.enums.FileState;
@@ -189,7 +190,16 @@ public class WindowsShortcutModel {
             String originalFilePath = shortcut.getRealFilename();
             File originalFile = new File(originalFilePath);
             if (originalFile.exists()) {
-                shortcut.setFileState(FileState.AVAILABLE);
+                try {
+                    String caseSensitivePath = originalFile.getCanonicalPath();
+                    if (originalFilePath.equals(caseSensitivePath)) {
+                        shortcut.setFileState(FileState.AVAILABLE);
+                    } else {
+                        shortcut.setFileState(FileState.CASE_SENSITIVE);
+                    }
+                } catch (IOException e) {
+                    shortcut.setFileState(FileState.CASE_SENSITIVE);
+                }
             } else {
                 shortcut.setFileState(FileState.UNAVAILABLE);
             }
