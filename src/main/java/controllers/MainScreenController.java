@@ -657,7 +657,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
                     Stage stage = new Stage();
                     stage.setScene(new Scene(rootNode));
                     stage.setTitle(getLocalizedString("dialog.removeCopies.title"));
-                    //stage.initStyle(StageStyle.UTILITY);
+                    stage.initStyle(StageStyle.UTILITY);
                     stage.initModality(Modality.APPLICATION_MODAL);
                     stage.setResizable(true);
                     //stage.resizableProperty().setValue(Boolean.TRUE);
