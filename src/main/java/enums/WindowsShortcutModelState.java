@@ -14,6 +14,7 @@ public enum WindowsShortcutModelState {
     REMOVED,
     CHECKED_AVAILABILITY,
     CHECKED_DUPLICATES,
+    REMOVED_DUPLICATES,
     CHANGED_ROOTS,
     CREATED_COPIES
 }

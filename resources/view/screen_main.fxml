@@ -258,8 +258,8 @@
             </GridPane>
             <TableView fx:id="tableView" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
               <columns>
-                <TableColumn fx:id="shortcutFilePathColumn" editable="false" prefWidth="373.99998474121094" text="Shortcut file" />
-                <TableColumn fx:id="originalFilePathColumn" editable="false" prefWidth="221.0" text="Original file" />
+                <TableColumn fx:id="shortcutFilePathColumn" editable="false" prefWidth="492.00000619888306" text="Shortcut file" />
+                <TableColumn fx:id="originalFilePathColumn" editable="false" prefWidth="421.0" text="Original file" />
               </columns>
                <opaqueInsets>
                   <Insets />

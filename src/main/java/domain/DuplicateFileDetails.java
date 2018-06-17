@@ -11,6 +11,12 @@ public class DuplicateFileDetails {
     private final StringProperty originalFilePath;      // file path of original file
     private BooleanProperty isSelected;
 
+    public DuplicateFileDetails(String shortcutFilePath, String originalFilePath) {
+        this.shortcutFilePath = new SimpleStringProperty(shortcutFilePath);
+        this.originalFilePath = new SimpleStringProperty(originalFilePath);
+        this.isSelected = new SimpleBooleanProperty(false);
+    }
+
     public DuplicateFileDetails(String shortcutFilePath, String originalFilePath, boolean isSelected) {
         this.shortcutFilePath = new SimpleStringProperty(shortcutFilePath);
         this.originalFilePath = new SimpleStringProperty(originalFilePath);

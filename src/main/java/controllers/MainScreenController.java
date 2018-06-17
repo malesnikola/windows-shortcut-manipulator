@@ -196,7 +196,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
     @FXML
     public void initialize() {
         windowsShortcutModel = WindowsShortcutModel.getInstance();
-        windowsShortcutModel.registerObserver(this);
+        windowsShortcutModel.registerWindowsShortcutObserver(this);
 
         // by default, language is English
         resourceBundle = ResourceBundle.getBundle("bundles.Bundle", new Locale("en", "EN"));
@@ -572,6 +572,12 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
                 consoleTextFlow.getChildren().addAll(checkedDuplicatesSuccessText);
 
                 break;
+            case REMOVED_DUPLICATES:
+                Text removedDuplicatesSuccessText = new Text(currentTime + getLocalizedString("files.manipulationWithDuplicates.successfully") + "\n");
+                removedDuplicatesSuccessText.setFill(Color.GREEN);
+                consoleTextFlow.getChildren().addAll(removedDuplicatesSuccessText);
+
+                break;
             case CHANGED_ROOTS:
 
                 break;
@@ -648,16 +654,20 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
                     Stage stage = new Stage();
                     stage.setScene(new Scene(rootNode));
                     stage.setTitle(getLocalizedString("dialog.removeCopies.title"));
-                    stage.initStyle(StageStyle.UTILITY);
+                    //stage.initStyle(StageStyle.UTILITY);
                     stage.initModality(Modality.APPLICATION_MODAL);
-                    stage.setResizable(false);
-                    stage.show();
+                    stage.setResizable(true);
+                    //stage.resizableProperty().setValue(Boolean.TRUE);
+                    stage.setOnCloseRequest(e -> windowsShortcutModel.finishRemoveDuplicates());
+                    stage.showAndWait();
+
+                    updateTable();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            } else {
-                addInfoOnConsole();
             }
+
+            addInfoOnConsole();
         });
     }
 

@@ -1,9 +1,9 @@
 package main.java.model;
 
-import main.java.domain.DuplicateFileInfo;
 import main.java.domain.FailedFileDetails;
 import main.java.domain.WindowsShortcutWrapper;
 import main.java.enums.FileState;
+import main.java.enums.ShortcutActionState;
 import main.java.enums.WindowsShortcutModelState;
 import main.java.workers.CheckAvailabilityWorker;
 import main.java.workers.CheckDuplicatesWorker;
@@ -37,7 +37,7 @@ public class WindowsShortcutModel {
     /**
      * List of duplicate files (files with the same target file)
      */
-    private List<DuplicateFileInfo> duplicateFiles = new LinkedList<>();
+    private Map<String, String> duplicateFiles = new HashMap<>();
 
     /**
      * Contains list of all files (with error details) which cannot be imported.
@@ -47,7 +47,7 @@ public class WindowsShortcutModel {
     /**
      * Contains list of all files (with error details) which cannot be saved.
      */
-    private List<FailedFileDetails> lastFailedSavingFiles = new LinkedList<>();
+    private List<FailedFileDetails> lastUnreachableFiles = new LinkedList<>();
 
     /**
      * Contains list of all files (with error details) which cannot be removed.
@@ -55,9 +55,11 @@ public class WindowsShortcutModel {
     private List<FailedFileDetails> lastFailedRemovedFiles = new LinkedList<>();
 
     /**
-     * Contains set of registered observers.
+     * Contains set of registered shortcutObservers.
      */
-    private Set<WindowsShortcutObserver> observers = new HashSet<>();
+    private Set<WindowsShortcutObserver> shortcutObservers = new HashSet<>();
+
+    private Set<ManipulationWithDuplicatesObserver> manipulationWithDuplicatesObservers = new HashSet<>();
 
     public static WindowsShortcutModel getInstance() {
         if (windowsShortcutModel == null) {
@@ -75,7 +77,7 @@ public class WindowsShortcutModel {
         return importedFiles;
     }
 
-    public List<DuplicateFileInfo> getDuplicateFiles() {
+    public Map<String, String> getDuplicateFiles() {
         return duplicateFiles;
     }
 
@@ -87,13 +89,15 @@ public class WindowsShortcutModel {
         return lastFailedLoadingFiles;
     }
 
-    public List<FailedFileDetails> getLastFailedSavingFiles() {
-        return lastFailedSavingFiles;
+    public List<FailedFileDetails> getLastUnreachableFiles() {
+        return lastUnreachableFiles;
     }
 
     public List<FailedFileDetails> getLastFailedRemovedFiles() {
         return lastFailedRemovedFiles;
     }
+
+    public boolean ifSomeFilesFailedRemoved() { return !lastFailedRemovedFiles.isEmpty(); }
 
     public WindowsShortcutModelState getLastModelState() {
         return lastModelState;
@@ -149,8 +153,8 @@ public class WindowsShortcutModel {
             });
 
             if (previousSizeOfImportedFiles != importedFiles.size() || !lastFailedLoadingFiles.isEmpty()) {
-                // notify observers if at least one file is imported, or at list one file cannot be imported
-                observers.forEach(WindowsShortcutObserver::onImportedFilesChanged);
+                // notify shortcutObservers if at least one file is imported, or at list one file cannot be imported
+                shortcutObservers.forEach(WindowsShortcutObserver::onImportedFilesChanged);
             }
         }
     }
@@ -170,8 +174,8 @@ public class WindowsShortcutModel {
             }
 
             if (previousSizeOfImportedFiles != importedFiles.size()) {
-                // notify observers if at least one file is removed
-                observers.forEach(WindowsShortcutObserver::onImportedFilesChanged);
+                // notify shortcutObservers if at least one file is removed
+                shortcutObservers.forEach(WindowsShortcutObserver::onImportedFilesChanged);
             }
         }
     }
@@ -196,8 +200,8 @@ public class WindowsShortcutModel {
         }
 
         if (!importedFiles.isEmpty()) {
-            // notify observers if at least one file is checked
-            observers.forEach(WindowsShortcutObserver::onCheckedAvailability);
+            // notify shortcutObservers if at least one file is checked
+            shortcutObservers.forEach(WindowsShortcutObserver::onCheckedAvailability);
         }
     }
 
@@ -206,14 +210,17 @@ public class WindowsShortcutModel {
 
         duplicateFiles.clear();
         Map<String, String> foundTargetFiles = new HashMap<>();
+        Set<String> foundedTargetPaths = new HashSet();
         AtomicInteger progress = new AtomicInteger();
         for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
             String originalFilePath = shortcut.getRealFilename();
             String shortcutFilePath = shortcut.getFilePath();
 
             if (foundTargetFiles.containsKey(originalFilePath)){
-                duplicateFiles.add(new DuplicateFileInfo(foundTargetFiles.get(originalFilePath), originalFilePath));
-                duplicateFiles.add(new DuplicateFileInfo(shortcutFilePath, originalFilePath));
+                duplicateFiles.put(shortcutFilePath, originalFilePath);
+                if (foundedTargetPaths.add(originalFilePath)) {
+                    duplicateFiles.put(foundTargetFiles.get(originalFilePath), originalFilePath);
+                }
             } else {
                 foundTargetFiles.put(originalFilePath, shortcutFilePath);
             }
@@ -223,15 +230,53 @@ public class WindowsShortcutModel {
             }
         }
 
-        observers.forEach(WindowsShortcutObserver::onCheckedCopies);
+        shortcutObservers.forEach(WindowsShortcutObserver::onCheckedCopies);
     }
 
-    public void registerObserver(WindowsShortcutObserver observer) {
-        observers.add(observer);
+    public void removeDuplicateFiles(List<String> filePaths) {
+        lastFailedRemovedFiles.clear();
+
+        for (String filePath : filePaths) {
+            if (tryToRemoveFile(filePath)) {
+                duplicateFiles.remove(filePath);
+                importedFiles.remove(filePath);
+            }
+        }
+
+        manipulationWithDuplicatesObservers.forEach(ManipulationWithDuplicatesObserver::onRemovedDuplicates);
     }
 
-    public void unregisterObserver(WindowsShortcutObserver observer) {
-        observers.remove(observer);
+    public void finishRemoveDuplicates() {
+        lastModelState = WindowsShortcutModelState.REMOVED_DUPLICATES;
+    }
+
+    private boolean tryToRemoveFile(String filePath) {
+        File fileForRemove = new File(filePath);
+        if (!fileForRemove.exists()) {
+            lastFailedRemovedFiles.add(new FailedFileDetails(filePath, "It doesn't exist in the first place."));
+            return false;
+        } else if (!fileForRemove.delete()) {
+            lastFailedRemovedFiles.add(new FailedFileDetails(filePath, "File couldn't be deleted."));
+            return false;
+        }
+
+        return true;
+    }
+
+    public void registerWindowsShortcutObserver(WindowsShortcutObserver observer) {
+        shortcutObservers.add(observer);
+    }
+
+    public void unregisterWindowsShortcutObserver(WindowsShortcutObserver observer) {
+        shortcutObservers.remove(observer);
+    }
+
+    public void registerManipulationWithDuplicatesObserver(ManipulationWithDuplicatesObserver observer) { manipulationWithDuplicatesObservers.add(observer); }
+
+    public void unregisterManipulationWithDuplicatesObserver(ManipulationWithDuplicatesObserver observer) { manipulationWithDuplicatesObservers.remove(observer); }
+
+    public interface ManipulationWithDuplicatesObserver {
+        void onRemovedDuplicates();
     }
 
     public interface WindowsShortcutObserver {
