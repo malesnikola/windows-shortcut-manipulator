@@ -1,11 +1,11 @@
 package main.java.model;
 
-import javafx.fxml.FXML;
 import main.java.domain.FailedFileDetails;
 import main.java.domain.WindowsShortcutWrapper;
 import main.java.enums.FileState;
-import main.java.enums.ShortcutActionState;
 import main.java.enums.WindowsShortcutModelState;
+import main.java.mslinks.mslinks.ShellLink;
+import main.java.workers.ChangeParentsWorker;
 import main.java.workers.CheckAvailabilityWorker;
 import main.java.workers.CheckDuplicatesWorker;
 import main.java.workers.ImportFilesWorker;
@@ -49,7 +49,7 @@ public class WindowsShortcutModel {
     /**
      * Contains list of all files (with error details) which cannot be saved.
      */
-    private List<FailedFileDetails> lastUnreachableFiles = new LinkedList<>();
+    private List<FailedFileDetails> lastFailedSavedFiles = new LinkedList<>();
 
     /**
      * Contains list of all files (with error details) which cannot be removed.
@@ -91,8 +91,8 @@ public class WindowsShortcutModel {
         return lastFailedLoadingFiles;
     }
 
-    public List<FailedFileDetails> getLastUnreachableFiles() {
-        return lastUnreachableFiles;
+    public List<FailedFileDetails> getLastFailedSavedFiles() {
+        return lastFailedSavedFiles;
     }
 
     public List<FailedFileDetails> getLastFailedRemovedFiles() {
@@ -264,7 +264,7 @@ public class WindowsShortcutModel {
     public List<String> getMinimumMatchingParents() {
         List<String> response = new LinkedList<String>();
         for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
-            String path = shortcut.getFilePath();
+            String path = shortcut.getRealFilename();
             String patternSeparator = Pattern.quote(System.getProperty("file.separator"));
             String[] splittedPath = path.split(patternSeparator);
 
@@ -295,10 +295,55 @@ public class WindowsShortcutModel {
         return response;
     }
 
-    private void changeParents(String newParents) {
-        for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
+    public boolean ifParentIsValid(String newParent) {
+        File file = new File(newParent);
+        return file.isDirectory();
+    }
 
+    private String replaceBeginningPath(String path, String oldParents, String newParents) {
+        String fileSeparator = System.getProperty("file.separator");
+        String patternSeparator = Pattern.quote(fileSeparator);
+        String[] splittedPath = path.split(patternSeparator);
+        String[] splittedOldParents = oldParents.split(patternSeparator);
+        String[] splittedNewParents = newParents.split(patternSeparator);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < splittedNewParents.length; i++) {
+            sb.append(splittedNewParents[i] + fileSeparator);
         }
+
+        for(int i = splittedOldParents.length; i < splittedPath.length; i++) {
+            sb.append(splittedPath[i] + fileSeparator);
+        }
+
+        sb.deleteCharAt(sb.length() - 1); // delete last '\'
+        return sb.toString();
+    }
+
+    public void changeParents(String oldParents, String newParents, ChangeParentsWorker worker) {
+        lastFailedSavedFiles.clear();
+
+        lastModelState = WindowsShortcutModelState.CHANGED_ROOTS;
+
+        AtomicInteger progress = new AtomicInteger();
+
+        for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
+            String originalFilePath = replaceBeginningPath(shortcut.getRealFilename(), oldParents, newParents);
+            String shortcutPath = shortcut.getFilePath();
+
+            try {
+                ShellLink.createLink(originalFilePath, shortcutPath);
+                shortcut.setRealFilename(originalFilePath);
+            } catch (IOException e) {
+                lastFailedSavedFiles.add(new FailedFileDetails(shortcutPath, e.getMessage()));
+                e.printStackTrace();
+            }
+
+            if (worker != null) {
+                worker.updateProgress(progress.incrementAndGet(), importedFiles.size());
+            }
+        }
+
+        shortcutObservers.forEach(o -> o.onChangedRoot());
     }
 
     private boolean tryToRemoveFile(String filePath) {

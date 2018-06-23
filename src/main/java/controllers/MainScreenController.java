@@ -14,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.*;
+import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -26,6 +27,7 @@ import main.java.enums.ShortcutActionState;
 import main.java.enums.WindowsShortcutModelState;
 import main.java.model.WindowsShortcutModel;
 import main.java.util.Constants;
+import main.java.workers.ChangeParentsWorker;
 import main.java.workers.CheckAvailabilityWorker;
 import main.java.workers.CheckDuplicatesWorker;
 import main.java.workers.ImportFilesWorker;
@@ -520,6 +522,63 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         new Thread(checkDuplicatesWorker).start();
     }
 
+    private Alert getAlertDialog(Alert.AlertType type, String titleText, String headerText, String text, ButtonType... buttonType) {
+        Alert alert = new Alert(type, text, buttonType);
+        alert.setHeaderText(headerText);
+        alert.setTitle(titleText);
+        alert.setResizable(false);
+        alert.initStyle(StageStyle.UTILITY);
+        alert.getDialogPane().getChildren().stream()
+                .filter(node -> node instanceof Label)
+                .forEach(node -> ((Label)node).setMinHeight(Region.USE_PREF_SIZE));
+
+        return alert;
+    }
+
+    public void changeRoots() {
+        String oldParents = ChooseRootChoiceBox.getValue();
+        String newParents = newRootTextField.getText();
+        if (oldParents == null || oldParents.isEmpty() || oldParents.equals("")) {
+            Alert alert = getAlertDialog(Alert.AlertType.ERROR, getLocalizedString("change.parents.title.text"), "", getLocalizedString("error.please.select.parents"), ButtonType.OK);
+            alert.showAndWait();
+            return;
+        }
+
+        if (!windowsShortcutModel.ifParentIsValid(newParents)) {
+            Alert alert = getAlertDialog(Alert.AlertType.ERROR, getLocalizedString("change.parents.title.text"), "", getLocalizedString("error.bad.format.for.new..parents"), ButtonType.OK);
+            alert.showAndWait();
+            return;
+        }
+
+        if (oldParents.equals(newParents)) {
+            Alert alert = getAlertDialog(Alert.AlertType.ERROR, getLocalizedString("change.parents.title.text"), "", getLocalizedString("error.old.and.new.parents.are.the.same"), ButtonType.OK);
+            alert.showAndWait();
+            return;
+        }
+
+        Alert alert = getAlertDialog(Alert.AlertType.CONFIRMATION, getLocalizedString("warning"), "", getLocalizedString("warning.are.you.sure.you.waant.to.change.parents"), ButtonType.YES, ButtonType.NO);
+        alert.showAndWait();
+        if (alert.getResult() == ButtonType.NO) {
+            return;
+        }
+
+        ProgressForm progressForm = new ProgressForm(scene);
+
+        Task checkDuplicatesWorker = new ChangeParentsWorker(windowsShortcutModel, oldParents, newParents, progressForm);
+
+        // binds progress of progress form to progress of task:
+        progressForm.activateProgressBar(checkDuplicatesWorker);
+
+        // disable all elements on scene
+        scene.getRoot().getChildrenUnmodifiable().forEach(c -> c.setDisable(true));
+
+        // open progress dialog
+        progressForm.getDialogStage().show();
+
+        // start new thread
+        new Thread(checkDuplicatesWorker).start();
+    }
+
     /**
      * Clear console.
      */
@@ -596,6 +655,13 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
 
                 break;
             case CHANGED_ROOTS:
+                if (!windowsShortcutModel.getLastFailedSavedFiles().isEmpty()) {
+                    addErrorsOnConsole(currentTime,"files.cannot.changed.parents", windowsShortcutModel.getLastFailedSavedFiles());
+                } else {
+                    Text importFilesSuccessText = new Text(currentTime + getLocalizedString("files.changedParentsSuccessfully") + "\n");
+                    importFilesSuccessText.setFill(Color.GREEN);
+                    consoleTextFlow.getChildren().addAll(importFilesSuccessText);
+                }
 
                 break;
 
@@ -691,7 +757,10 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
 
     @Override
     public void onChangedRoot() {
-
+        Platform.runLater(() -> {
+            updateTable();
+            addInfoOnConsole();
+        });
     }
 
     @Override

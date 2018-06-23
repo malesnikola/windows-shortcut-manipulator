@@ -47,6 +47,10 @@ public class WindowsShortcutWrapper extends WindowsShortcut {
         this.shortcutActionState = shortcutActionState;
     }
 
+    public void setRealFilename(String realFilename) {
+        this.real_file = realFilename;
+    }
+
     public String getFilePath() {
         return filePath;
     }

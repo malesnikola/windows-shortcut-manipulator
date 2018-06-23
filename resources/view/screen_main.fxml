@@ -205,7 +205,7 @@
                               <Font name="System Bold" size="18.0" />
                            </font>
                         </Label>
-                        <Button fx:id="changeRootButton" mnemonicParsing="false" text="Promeni" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+                        <Button fx:id="changeRootButton" mnemonicParsing="false" onAction="#changeRoots" text="Promeni" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
                      </children>
                      <GridPane.margin>
                         <Insets right="5.0" />
