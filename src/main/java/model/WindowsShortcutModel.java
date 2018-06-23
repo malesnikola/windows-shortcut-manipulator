@@ -295,6 +295,12 @@ public class WindowsShortcutModel {
         return response;
     }
 
+    private void changeParents(String newParents) {
+        for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
+
+        }
+    }
+
     private boolean tryToRemoveFile(String filePath) {
         File fileForRemove = new File(filePath);
         if (!fileForRemove.exists()) {
