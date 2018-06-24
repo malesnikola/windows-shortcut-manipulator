@@ -4,8 +4,8 @@ public enum ShortcutActionState {
     NONE ("none"),
     SAVED ("saved"),
     MODIFIED("modified"),
-    FAILED_MODIFIED("failed modified"),
-    FAILED_SAVED("failed saved");
+    FAILED_MODIFIED("failed_modified"),
+    FAILED_SAVED("failed_saved");
 
     private String stateText;
 

@@ -368,6 +368,12 @@ public class WindowsShortcutModel {
                 parentDirectories.append(splittedPath[i] + fileSeparator);
             }
 
+            // create parent directories if does not exist
+            File parentDirectory = new File(commonPathForSaving + fileSeparator + parentDirectories.toString());
+            if (!parentDirectory.exists()) {
+                parentDirectory.mkdirs();
+            }
+
             newFileName = parentDirectories.toString() + newFileName;
         }
 
