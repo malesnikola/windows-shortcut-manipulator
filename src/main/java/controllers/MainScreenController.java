@@ -27,10 +27,7 @@ import main.java.enums.ShortcutActionState;
 import main.java.enums.WindowsShortcutModelState;
 import main.java.model.WindowsShortcutModel;
 import main.java.util.Constants;
-import main.java.workers.ChangeParentsWorker;
-import main.java.workers.CheckAvailabilityWorker;
-import main.java.workers.CheckDuplicatesWorker;
-import main.java.workers.ImportFilesWorker;
+import main.java.workers.*;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -351,7 +348,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
     }
 
     private void setDropdownParentList() {
-        List<String> parents = windowsShortcutModel.getMinimumMatchingParents();
+        List<String> parents = windowsShortcutModel.getMinimumMatchingParents(true);
         ObservableList<String> choiceBoxData = FXCollections.observableArrayList();
         if (!parents.isEmpty()) {
             StringBuilder sb = new StringBuilder();
@@ -545,7 +542,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
             return;
         }
 
-        if (!windowsShortcutModel.ifParentIsValid(newParents)) {
+        if (!windowsShortcutModel.ifFolderIsValid(newParents)) {
             Alert alert = getAlertDialog(Alert.AlertType.ERROR, getLocalizedString("change.parents.title.text"), "", getLocalizedString("error.bad.format.for.new..parents"), ButtonType.OK);
             alert.showAndWait();
             return;
@@ -566,6 +563,43 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         ProgressForm progressForm = new ProgressForm(scene);
 
         Task checkDuplicatesWorker = new ChangeParentsWorker(windowsShortcutModel, oldParents, newParents, progressForm);
+
+        // binds progress of progress form to progress of task:
+        progressForm.activateProgressBar(checkDuplicatesWorker);
+
+        // disable all elements on scene
+        scene.getRoot().getChildrenUnmodifiable().forEach(c -> c.setDisable(true));
+
+        // open progress dialog
+        progressForm.getDialogStage().show();
+
+        // start new thread
+        new Thread(checkDuplicatesWorker).start();
+    }
+
+    public void createCopies() {
+        if (tableData == null || tableData.isEmpty()) {
+            Alert alert = getAlertDialog(Alert.AlertType.ERROR, getLocalizedString("create.copies.title.text"), "", getLocalizedString("no.files.imported"), ButtonType.OK);
+            alert.showAndWait();
+            return;
+        }
+
+        String destinationPath = rootForCopiesTextField.getText();
+        if (!windowsShortcutModel.ifFolderIsValid(destinationPath)) {
+            Alert alert = getAlertDialog(Alert.AlertType.ERROR, getLocalizedString("create.copies.title.text"), "", getLocalizedString("error.bad.destination.folder"), ButtonType.OK);
+            alert.showAndWait();
+            return;
+        }
+
+        Alert alert = getAlertDialog(Alert.AlertType.CONFIRMATION, getLocalizedString("warning"), "", getLocalizedString("warning.are.you.sure.you.waant.to.create.copies"), ButtonType.YES, ButtonType.NO);
+        alert.showAndWait();
+        if (alert.getResult() == ButtonType.NO) {
+            return;
+        }
+
+        ProgressForm progressForm = new ProgressForm(scene);
+
+        Task checkDuplicatesWorker = new CreateCopiesWorker(windowsShortcutModel, destinationPath, true, progressForm);
 
         // binds progress of progress form to progress of task:
         progressForm.activateProgressBar(checkDuplicatesWorker);
@@ -667,6 +701,13 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
                 break;
 
             case CREATED_COPIES:
+                if (!windowsShortcutModel.getLastFailedSavedFiles().isEmpty()) {
+                    addErrorsOnConsole(currentTime,"files.cannot.be.saved", windowsShortcutModel.getLastFailedSavedFiles());
+                } else {
+                    Text importFilesSuccessText = new Text(currentTime + getLocalizedString("files.saved.successfully") + "\n");
+                    importFilesSuccessText.setFill(Color.GREEN);
+                    consoleTextFlow.getChildren().addAll(importFilesSuccessText);
+                }
 
                 break;
 
@@ -709,7 +750,35 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
      * Open directory chooser dialog and import all ".mp3" files from chosen directory into mp3Model.
      */
     public void openFolder() {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        File selectedDirectory = directoryChooser.showDialog(tableView.getScene().getWindow());
+        if (selectedDirectory != null) {
+            File[] selectedFiles = selectedDirectory.listFiles();
+            List<File> filesForImport = Arrays.asList(selectedFiles);
 
+            ProgressForm progressForm = new ProgressForm(scene);
+            Task importFilesWorker = new ImportFilesWorker(windowsShortcutModel, progressForm, filesForImport);
+
+            // binds progress of progress form to progress of task
+            progressForm.activateProgressBar(importFilesWorker);
+
+            // disable all elements on scene
+            scene.getRoot().getChildrenUnmodifiable().forEach(c -> c.setDisable(true));
+
+            // open progress dialog
+            progressForm.getDialogStage().show();
+
+            // saveFiles new thread
+            new Thread(importFilesWorker).start();
+        }
+    }
+
+    public void chooseFolderForSaving() {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        File selectedDirectory = directoryChooser.showDialog(tableView.getScene().getWindow());
+        if (selectedDirectory != null) {
+            rootForCopiesTextField.setText(selectedDirectory.getPath());
+        }
     }
 
     @Override
@@ -767,6 +836,9 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
 
     @Override
     public void onCreateCopies() {
-
+        Platform.runLater(() -> {
+            updateTable();
+            addInfoOnConsole();
+        });
     }
 }

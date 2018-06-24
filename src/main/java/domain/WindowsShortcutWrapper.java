@@ -12,6 +12,7 @@ import java.text.ParseException;
 public class WindowsShortcutWrapper {
 
     private ShellLink shellLink;
+    private String fileName;
     private String filePath;
     private String targetFilePath;
     private FileState fileState;
@@ -21,6 +22,7 @@ public class WindowsShortcutWrapper {
         shellLink = new ShellLink(file);
         this.targetFilePath = shellLink.getLinkInfo().getLocalBasePath();
         this.filePath = file.getPath();
+        this.fileName = file.getName();
         shortcutActionState = ShortcutActionState.NONE;
         fileState = FileState.UNKNOWN;
         // little hack:
@@ -60,5 +62,9 @@ public class WindowsShortcutWrapper {
 
     public String getFilePath() {
         return filePath;
+    }
+
+    public String getFileName() {
+        return fileName;
     }
 }

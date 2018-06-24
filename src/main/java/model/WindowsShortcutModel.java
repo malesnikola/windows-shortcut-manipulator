@@ -6,14 +6,14 @@ import main.java.enums.FileState;
 import main.java.enums.ShortcutActionState;
 import main.java.enums.WindowsShortcutModelState;
 import main.java.mslinks.mslinks.ShellLink;
-import main.java.workers.ChangeParentsWorker;
-import main.java.workers.CheckAvailabilityWorker;
-import main.java.workers.CheckDuplicatesWorker;
-import main.java.workers.ImportFilesWorker;
+import main.java.workers.*;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -56,6 +56,8 @@ public class WindowsShortcutModel {
      * Contains list of all files (with error details) which cannot be removed.
      */
     private List<FailedFileDetails> lastFailedRemovedFiles = new LinkedList<>();
+
+    private List<String> minimumParentList = new LinkedList<>();
 
     /**
      * Contains set of registered shortcutObservers.
@@ -262,10 +264,10 @@ public class WindowsShortcutModel {
         lastModelState = WindowsShortcutModelState.REMOVED_DUPLICATES;
     }
 
-    public List<String> getMinimumMatchingParents() {
-        List<String> response = new LinkedList<String>();
+    public List<String> getMinimumMatchingParents(boolean ifCheckingTargetPaths) {
+        List<String> response = new LinkedList<>();
         for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
-            String path = shortcut.getTargetFilePath();
+            String path = (ifCheckingTargetPaths ? shortcut.getTargetFilePath() : shortcut.getFilePath());
             String patternSeparator = Pattern.quote(System.getProperty("file.separator"));
             String[] splittedPath = path.split(patternSeparator);
 
@@ -296,8 +298,8 @@ public class WindowsShortcutModel {
         return response;
     }
 
-    public boolean ifParentIsValid(String newParent) {
-        File file = new File(newParent);
+    public boolean ifFolderIsValid(String folderPath) {
+        File file = new File(folderPath);
         return file.isDirectory();
     }
 
@@ -347,6 +349,58 @@ public class WindowsShortcutModel {
         }
 
         shortcutObservers.forEach(o -> o.onChangedRoot());
+    }
+
+    private String fixShortcutFileName(String fileName) {
+        return fileName.replaceAll(" - Shortcut.lnk", "");
+    }
+
+    private String getSavingDestinationForFile(WindowsShortcutWrapper shortcut, String commonPathForSaving, List<String> minimumParentPath) {
+        String fileSeparator = System.getProperty("file.separator");
+        String shortcutPath = shortcut.getFilePath();
+        String newFileName = fixShortcutFileName(shortcut.getFileName());
+
+        if ((minimumParentPath != null) && !minimumParentPath.isEmpty()){
+            String patternSeparator = Pattern.quote(fileSeparator);
+            String[] splittedPath = shortcutPath.split(patternSeparator);
+            StringBuilder parentDirectories = new StringBuilder("");
+            for (int i = minimumParentPath.size(); i < splittedPath.length - 1; i++) {
+                parentDirectories.append(splittedPath[i] + fileSeparator);
+            }
+
+            newFileName = parentDirectories.toString() + newFileName;
+        }
+
+        return commonPathForSaving + fileSeparator + newFileName;
+    }
+
+    public void copyTargetFiles(String commonPathForSaving, boolean ifSaveHierarchy, CreateCopiesWorker worker) {
+        lastFailedSavedFiles.clear();
+
+        lastModelState = WindowsShortcutModelState.CREATED_COPIES;
+
+        AtomicInteger progress = new AtomicInteger();
+        List<String> minimumParentPath = (ifSaveHierarchy ? getMinimumMatchingParents(false) : null);
+
+        for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
+            String originalFilePath = shortcut.getTargetFilePath();
+            String pathForSaving = getSavingDestinationForFile(shortcut, commonPathForSaving, minimumParentPath);
+
+            try {
+                Files.copy(Paths.get(originalFilePath), Paths.get(pathForSaving), StandardCopyOption.REPLACE_EXISTING);
+                shortcut.setShortcutActionState(ShortcutActionState.SAVED);
+            } catch (Exception e) {
+                shortcut.setShortcutActionState(ShortcutActionState.FAILED_SAVED);
+                lastFailedSavedFiles.add(new FailedFileDetails(shortcut.getFilePath(), e.getMessage()));
+                logger.debug("Exception in method copyTargetFiles: " + e.getMessage());
+            }
+
+            if (worker != null) {
+                worker.updateProgress(progress.incrementAndGet(), importedFiles.size());
+            }
+        }
+
+        shortcutObservers.forEach(o -> o.onCreateCopies());
     }
 
     private boolean tryToRemoveFile(String filePath) {

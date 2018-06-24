@@ -232,7 +232,7 @@
                           </rowConstraints>
                            <children>
                               <TextField fx:id="rootForCopiesTextField" prefWidth="202.0" />
-                              <Button fx:id="chooseDirectoryButton" mnemonicParsing="false" text="..." GridPane.columnIndex="1">
+                              <Button fx:id="chooseDirectoryButton" mnemonicParsing="false" onAction="#chooseFolderForSaving" text="..." GridPane.columnIndex="1">
                                  <GridPane.margin>
                                     <Insets left="3.0" />
                                  </GridPane.margin>
@@ -244,7 +244,7 @@
                               <Font name="System Bold" size="18.0" />
                            </font>
                         </Label>
-                        <Button fx:id="createCopiesButton" mnemonicParsing="false" text="Kopiraj" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+                        <Button fx:id="createCopiesButton" mnemonicParsing="false" onAction="#createCopies" text="Kopiraj" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
                         <Label fx:id="directoryLabel" text="Direktorijum:" GridPane.rowIndex="1" />
                      </children>
                      <GridPane.margin>
