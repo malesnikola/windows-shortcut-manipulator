@@ -3,6 +3,7 @@ package main.java.model;
 import main.java.domain.FailedFileDetails;
 import main.java.domain.WindowsShortcutWrapper;
 import main.java.enums.FileState;
+import main.java.enums.ShortcutActionState;
 import main.java.enums.WindowsShortcutModelState;
 import main.java.mslinks.mslinks.ShellLink;
 import main.java.workers.ChangeParentsWorker;
@@ -333,9 +334,11 @@ public class WindowsShortcutModel {
             try {
                 ShellLink.createLink(originalFilePath, shortcutPath);
                 shortcut.setTargetFilePath(originalFilePath);
+                shortcut.setShortcutActionState(ShortcutActionState.MODIFIED);
             } catch (IOException e) {
+                shortcut.setShortcutActionState(ShortcutActionState.FAILED_MODIFIED);
                 lastFailedSavedFiles.add(new FailedFileDetails(shortcutPath, e.getMessage()));
-                e.printStackTrace();
+                logger.debug("Exception in method changeParents: " + e.getMessage());
             }
 
             if (worker != null) {

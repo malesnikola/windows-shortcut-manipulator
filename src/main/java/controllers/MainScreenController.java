@@ -361,6 +361,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
             }
         }
 
+        newRootTextField.clear();
         ChooseRootChoiceBox.setItems(choiceBoxData);
     }
 
@@ -550,11 +551,11 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
             return;
         }
 
-//        if (oldParents.equals(newParents)) {
-//            Alert alert = getAlertDialog(Alert.AlertType.ERROR, getLocalizedString("change.parents.title.text"), "", getLocalizedString("error.old.and.new.parents.are.the.same"), ButtonType.OK);
-//            alert.showAndWait();
-//            return;
-//        }
+        if (oldParents.equals(newParents)) {
+            Alert alert = getAlertDialog(Alert.AlertType.ERROR, getLocalizedString("change.parents.title.text"), "", getLocalizedString("error.old.and.new.parents.are.the.same"), ButtonType.OK);
+            alert.showAndWait();
+            return;
+        }
 
         Alert alert = getAlertDialog(Alert.AlertType.CONFIRMATION, getLocalizedString("warning"), "", getLocalizedString("warning.are.you.sure.you.waant.to.change.parents"), ButtonType.YES, ButtonType.NO);
         alert.showAndWait();
@@ -758,6 +759,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
     @Override
     public void onChangedRoot() {
         Platform.runLater(() -> {
+            setDropdownParentList();
             updateTable();
             addInfoOnConsole();
         });
