@@ -18,7 +18,7 @@ public class WindowsShortcutDetails {
 
     public static WindowsShortcutDetails deserialize(WindowsShortcutWrapper windowsShortcutWrapper) {
         String shortcutPath = windowsShortcutWrapper.getFilePath();
-        String originalPath = windowsShortcutWrapper.getRealFilename();
+        String originalPath = windowsShortcutWrapper.getTargetFilePath();
         String fileState = windowsShortcutWrapper.getFileState().toString();
         String shortcutActionState = windowsShortcutWrapper.getShortcutActionState().toString();
         return new WindowsShortcutDetails(shortcutPath, originalPath, fileState, shortcutActionState);

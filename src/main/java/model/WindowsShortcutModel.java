@@ -188,7 +188,7 @@ public class WindowsShortcutModel {
         AtomicInteger progress = new AtomicInteger();
 
         for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
-            String originalFilePath = shortcut.getRealFilename();
+            String originalFilePath = shortcut.getTargetFilePath();
             File originalFile = new File(originalFilePath);
             if (originalFile.exists()) {
                 try {
@@ -224,7 +224,7 @@ public class WindowsShortcutModel {
         Set<String> foundedTargetPaths = new HashSet();
         AtomicInteger progress = new AtomicInteger();
         for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
-            String originalFilePath = shortcut.getRealFilename();
+            String originalFilePath = shortcut.getTargetFilePath();
             String shortcutFilePath = shortcut.getFilePath();
 
             if (foundTargetFiles.containsKey(originalFilePath)){
@@ -264,7 +264,7 @@ public class WindowsShortcutModel {
     public List<String> getMinimumMatchingParents() {
         List<String> response = new LinkedList<String>();
         for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
-            String path = shortcut.getRealFilename();
+            String path = shortcut.getTargetFilePath();
             String patternSeparator = Pattern.quote(System.getProperty("file.separator"));
             String[] splittedPath = path.split(patternSeparator);
 
@@ -327,12 +327,12 @@ public class WindowsShortcutModel {
         AtomicInteger progress = new AtomicInteger();
 
         for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
-            String originalFilePath = replaceBeginningPath(shortcut.getRealFilename(), oldParents, newParents);
+            String originalFilePath = replaceBeginningPath(shortcut.getTargetFilePath(), oldParents, newParents);
             String shortcutPath = shortcut.getFilePath();
 
             try {
                 ShellLink.createLink(originalFilePath, shortcutPath);
-                shortcut.setRealFilename(originalFilePath);
+                shortcut.setTargetFilePath(originalFilePath);
             } catch (IOException e) {
                 lastFailedSavedFiles.add(new FailedFileDetails(shortcutPath, e.getMessage()));
                 e.printStackTrace();

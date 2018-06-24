@@ -1,5 +1,7 @@
 package main.java.domain;
 
+import main.java.controllers.MainScreenController;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
