@@ -74,10 +74,6 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
     @FXML
     private TextFlow consoleTextFlow;
 
-    // progress bar
-    @FXML
-    private ProgressBar progressBar;
-
     // buttons
     @FXML
     private Button checkAvailabilityButton;
@@ -330,7 +326,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
                                     this.setTextFill(Color.GREEN);
                                     break;
                                 case MODIFIED:
-                                    this.setTextFill(Color.GREEN);
+                                    this.setTextFill(Color.BLUE);
                                     break;
                                 case FAILED_MODIFIED:
                                     this.setTextFill(Color.RED);

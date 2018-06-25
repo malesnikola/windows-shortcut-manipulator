@@ -1,7 +1,7 @@
 package main.java.util;
 
 public class Constants {
-    public static final String APP_VERSION = "2018.06.15";
+    public static final String APP_VERSION = "2018.06.25";
 
     public static final String LNK_FILE_TYPE_EXTENSION = ".lnk";
     public static final String LNK_FILE_TYPE_DESCRIPTION = "Windows shortcut files (*.lnk)";
