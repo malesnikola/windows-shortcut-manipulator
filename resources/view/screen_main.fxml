@@ -90,7 +90,7 @@
                         <Insets />
                      </GridPane.margin>
                      <children>
-                        <Button fx:id="checkDuplicatesButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#checkDuplicates" prefHeight="96.0" prefWidth="118.0" text="Proveri duplikate" textAlignment="CENTER">
+                        <Button fx:id="checkDuplicatesButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#checkDuplicates" prefHeight="96.0" prefWidth="118.0" text="Check duplicates" textAlignment="CENTER">
                            <graphic>
                               <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
@@ -115,7 +115,7 @@
                      <top>
                         <BorderPane prefHeight="14.0" prefWidth="343.0" BorderPane.alignment="CENTER">
                            <left>
-                              <Label fx:id="consoleLabel" text="Konzola" BorderPane.alignment="CENTER">
+                              <Label fx:id="consoleLabel" text="Console:" BorderPane.alignment="CENTER">
                                  <font>
                                     <Font name="System Bold" size="12.0" />
                                  </font></Label>
@@ -142,7 +142,7 @@
                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
-                        <Button fx:id="checkAvailabilityButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#checkAvailability" prefHeight="96.0" prefWidth="118.0" text="Proveri dostupnost" textAlignment="CENTER">
+                        <Button fx:id="checkAvailabilityButton" contentDisplay="TOP" mnemonicParsing="false" onAction="#checkAvailability" prefHeight="96.0" prefWidth="118.0" text="Check availability" textAlignment="CENTER">
                            <graphic>
                               <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
@@ -177,8 +177,8 @@
                      <children>
                         <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="2">
                            <children>
-                              <ChoiceBox fx:id="ChooseRootChoiceBox" prefWidth="150.0" />
-                              <TextField fx:id="newRootTextField">
+                              <ChoiceBox fx:id="ChooseParentsChoiceBox" prefWidth="150.0" />
+                              <TextField fx:id="newParentsTextField">
                                  <HBox.margin>
                                     <Insets left="3.0" />
                                  </HBox.margin></TextField>
@@ -186,7 +186,7 @@
                         </HBox>
                         <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="1">
                            <children>
-                              <Label fx:id="chooseRootLabel" prefHeight="17.0" prefWidth="121.0" text="Odaberi root:" textFill="BLUE">
+                              <Label fx:id="chooseParentsLabel" prefHeight="17.0" prefWidth="121.0" text="Choose parents:" textFill="BLUE">
                                  <opaqueInsets>
                                     <Insets />
                                  </opaqueInsets>
@@ -196,18 +196,18 @@
                                  <font>
                                     <Font name="System Bold" size="12.0" />
                                  </font></Label>
-                              <Label fx:id="newRootLabel" text="Novi root:" textFill="BLUE">
+                              <Label fx:id="newParentsLabel" text="New parents:" textFill="BLUE">
                                  <font>
                                     <Font name="System Bold" size="12.0" />
                                  </font></Label>
                            </children>
                         </HBox>
-                        <Label fx:id="changeRootLabel" alignment="TOP_LEFT" text="Promeni root" textAlignment="CENTER" textFill="BLUE" GridPane.halignment="CENTER">
+                        <Label fx:id="changeParentsLabel" alignment="TOP_LEFT" text="Change parents" textAlignment="CENTER" textFill="BLUE" GridPane.halignment="CENTER">
                            <font>
                               <Font name="System Bold" size="18.0" />
                            </font>
                         </Label>
-                        <Button fx:id="changeRootButton" mnemonicParsing="false" onAction="#changeRoots" prefHeight="25.0" prefWidth="114.0" text="Promeni" textFill="BLUE" GridPane.halignment="CENTER" GridPane.rowIndex="3">
+                        <Button fx:id="changeParentsButton" mnemonicParsing="false" onAction="#changeRoots" prefHeight="25.0" prefWidth="114.0" text="Change" textFill="BLUE" GridPane.halignment="CENTER" GridPane.rowIndex="3">
                            <font>
                               <Font name="System Bold" size="12.0" />
                            </font></Button>
@@ -236,7 +236,7 @@
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
-                              <TextField fx:id="rootForCopiesTextField" prefWidth="202.0" />
+                              <TextField fx:id="directoryForCopiesTextField" prefWidth="202.0" />
                               <Button fx:id="chooseDirectoryButton" mnemonicParsing="false" onAction="#chooseFolderForSaving" text="..." textFill="#008000" GridPane.columnIndex="1">
                                  <GridPane.margin>
                                     <Insets left="3.0" />
@@ -244,12 +244,12 @@
                               </Button>
                            </children>
                         </GridPane>
-                        <Label fx:id="createCopiesLabel" text="Kreiraj kopije" textFill="GREEN" GridPane.halignment="CENTER">
+                        <Label fx:id="createCopiesLabel" text="Create copies" textFill="GREEN" GridPane.halignment="CENTER">
                            <font>
                               <Font name="System Bold" size="18.0" />
                            </font>
                         </Label>
-                        <Label fx:id="directoryLabel" text="Direktorijum:" textFill="GREEN" GridPane.rowIndex="1">
+                        <Label fx:id="directoryLabel" text="Directory:" textFill="GREEN" GridPane.rowIndex="1">
                            <font>
                               <Font name="System Bold" size="12.0" />
                            </font></Label>
@@ -262,7 +262,7 @@
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
-                              <CheckBox fx:id="keepHierarchyCheckBox" mnemonicParsing="false" selected="true" text="Čuvaj hijerarhiju" textFill="GREEN">
+                              <CheckBox fx:id="keepHierarchyCheckBox" mnemonicParsing="false" selected="true" text="Keep hierarchy" textFill="GREEN">
                                  <padding>
                                     <Insets left="1.0" />
                                  </padding>
@@ -270,7 +270,7 @@
                                     <Font name="System Bold" size="12.0" />
                                  </font>
                               </CheckBox>
-                              <Button fx:id="createCopiesButton" mnemonicParsing="false" onAction="#createCopies" prefHeight="25.0" prefWidth="114.0" text="Kopiraj" textFill="#008000" GridPane.columnIndex="1" GridPane.halignment="RIGHT">
+                              <Button fx:id="createCopiesButton" mnemonicParsing="false" onAction="#createCopies" prefHeight="25.0" prefWidth="114.0" text="Copy" textFill="#008000" GridPane.columnIndex="1" GridPane.halignment="RIGHT">
                                  <GridPane.margin>
                                     <Insets />
                                  </GridPane.margin>

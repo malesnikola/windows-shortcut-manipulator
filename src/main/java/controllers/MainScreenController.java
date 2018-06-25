@@ -21,7 +21,9 @@ import javafx.scene.text.TextFlow;
 import javafx.stage.*;
 import javafx.util.Callback;
 import main.java.dialogs.ProgressForm;
-import main.java.domain.*;
+import main.java.domain.FailedFileDetails;
+import main.java.domain.WindowsShortcutDetails;
+import main.java.domain.WindowsShortcutWrapper;
 import main.java.enums.FileState;
 import main.java.enums.ShortcutActionState;
 import main.java.enums.WindowsShortcutModelState;
@@ -45,7 +47,6 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
     private Scene scene;
     private String chosenLanguage; // en (English), rs (Serbian)
 
-    private Task saveFilesWorker;
     private TableColumn chosenSortingColumn;
 
     // menu
@@ -80,23 +81,23 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
     @FXML
     private Button checkDuplicatesButton;
     @FXML
-    private Button changeRootButton;
-    @FXML
-    private Button createCopiesButton;
+    private Button changeParentsButton;
     @FXML
     private Button chooseDirectoryButton;
+    @FXML
+    private Button createCopiesButton;
     @FXML
     private Button clearConsoleButton;
 
     // choice box
     @FXML
-    private ChoiceBox<String> ChooseRootChoiceBox;
+    private ChoiceBox<String> ChooseParentsChoiceBox;
 
     // text field
     @FXML
-    private TextField newRootTextField;
+    private TextField newParentsTextField;
     @FXML
-    private TextField rootForCopiesTextField;
+    private TextField directoryForCopiesTextField;
 
     // check box
     @FXML
@@ -104,11 +105,11 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
 
     // labels
     @FXML
-    private Label changeRootLabel;
+    private Label changeParentsLabel;
     @FXML
-    private Label chooseRootLabel;
+    private Label chooseParentsLabel;
     @FXML
-    private Label newRootLabel;
+    private Label newParentsLabel;
     @FXML
     private Label createCopiesLabel;
     @FXML
@@ -167,9 +168,9 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         aboutMenuItem.setText(getLocalizedString("menu.item.about.text"));
 
         // labels
-        changeRootLabel.setText(getLocalizedString("label.changeRoot.text"));
-        chooseRootLabel.setText(getLocalizedString("label.chooseRoot.text"));
-        newRootLabel.setText(getLocalizedString("label.newRoot.text"));
+        changeParentsLabel.setText(getLocalizedString("label.changeParents.text"));
+        chooseParentsLabel.setText(getLocalizedString("label.chooseParents.text"));
+        newParentsLabel.setText(getLocalizedString("label.newParents.text"));
         createCopiesLabel.setText(getLocalizedString("label.createCopies.text"));
         directoryLabel.setText(getLocalizedString("label.directory.text"));
         consoleLabel.setText(getLocalizedString("label.console.text"));
@@ -177,9 +178,9 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         // buttons
         checkAvailabilityButton.setText(getLocalizedString("button.checkAvailability.text"));
         checkDuplicatesButton.setText(getLocalizedString("button.checkDuplicates.text"));
-        changeRootButton.setText(getLocalizedString("button.changeRoot.text"));
-        createCopiesButton.setText(getLocalizedString("button.createCopies.text"));
+        changeParentsButton.setText(getLocalizedString("button.changeParents.text"));
         chooseDirectoryButton.setText(getLocalizedString("button.chooseDirectory.text"));
+        createCopiesButton.setText(getLocalizedString("button.createCopies.text"));
         clearConsoleButton.setTooltip(new Tooltip(getLocalizedString("button.clearConsole.tooltip")));
 
         // check boxes
@@ -361,8 +362,8 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
             }
         }
 
-        newRootTextField.clear();
-        ChooseRootChoiceBox.setItems(choiceBoxData);
+        newParentsTextField.clear();
+        ChooseParentsChoiceBox.setItems(choiceBoxData);
     }
 
     /**
@@ -537,8 +538,8 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
     }
 
     public void changeRoots() {
-        String oldParents = ChooseRootChoiceBox.getValue();
-        String newParents = newRootTextField.getText();
+        String oldParents = ChooseParentsChoiceBox.getValue();
+        String newParents = newParentsTextField.getText();
         if (oldParents == null || oldParents.isEmpty() || oldParents.equals("")) {
             Alert alert = getAlertDialog(Alert.AlertType.ERROR, getLocalizedString("change.parents.title.text"), "", getLocalizedString("error.please.select.parents"), ButtonType.OK);
             alert.showAndWait();
@@ -587,7 +588,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
             return;
         }
 
-        String destinationPath = rootForCopiesTextField.getText();
+        String destinationPath = directoryForCopiesTextField.getText();
         if (!windowsShortcutModel.ifFolderIsValid(destinationPath)) {
             Alert alert = getAlertDialog(Alert.AlertType.ERROR, getLocalizedString("create.copies.title.text"), "", getLocalizedString("error.bad.destination.folder"), ButtonType.OK);
             alert.showAndWait();
@@ -780,7 +781,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         DirectoryChooser directoryChooser = new DirectoryChooser();
         File selectedDirectory = directoryChooser.showDialog(tableView.getScene().getWindow());
         if (selectedDirectory != null) {
-            rootForCopiesTextField.setText(selectedDirectory.getPath());
+            directoryForCopiesTextField.setText(selectedDirectory.getPath());
         }
     }
 
