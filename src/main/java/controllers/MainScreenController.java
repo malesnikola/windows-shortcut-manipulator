@@ -102,6 +102,10 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
     @FXML
     private TextField rootForCopiesTextField;
 
+    // check box
+    @FXML
+    private CheckBox keepHierarchyCheckBox;
+
     // labels
     @FXML
     private Label changeRootLabel;
@@ -181,6 +185,9 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         createCopiesButton.setText(getLocalizedString("button.createCopies.text"));
         chooseDirectoryButton.setText(getLocalizedString("button.chooseDirectory.text"));
         clearConsoleButton.setTooltip(new Tooltip(getLocalizedString("button.clearConsole.tooltip")));
+
+        // check boxes
+        keepHierarchyCheckBox.setText(getLocalizedString("checkbox.keepHierarchy.text"));
 
         // data table
         tableView.setPlaceholder(new Label(getLocalizedString("table.placeholder.text")));
@@ -599,7 +606,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
 
         ProgressForm progressForm = new ProgressForm(scene);
 
-        Task checkDuplicatesWorker = new CreateCopiesWorker(windowsShortcutModel, destinationPath, true, progressForm);
+        Task checkDuplicatesWorker = new CreateCopiesWorker(windowsShortcutModel, destinationPath, keepHierarchyCheckBox.isSelected(), progressForm);
 
         // binds progress of progress form to progress of task:
         progressForm.activateProgressBar(checkDuplicatesWorker);

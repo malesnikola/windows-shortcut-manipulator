@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.CheckMenuItem?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
@@ -244,8 +245,28 @@
                               <Font name="System Bold" size="18.0" />
                            </font>
                         </Label>
-                        <Button fx:id="createCopiesButton" mnemonicParsing="false" onAction="#createCopies" text="Kopiraj" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
                         <Label fx:id="directoryLabel" text="Direktorijum:" GridPane.rowIndex="1" />
+                        <GridPane GridPane.rowIndex="3">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <CheckBox fx:id="keepHierarchyCheckBox" mnemonicParsing="false" selected="true" text="čuvaj hijerarhiju">
+                                 <padding>
+                                    <Insets left="1.0" />
+                                 </padding>
+                              </CheckBox>
+                              <Button fx:id="createCopiesButton" mnemonicParsing="false" onAction="#createCopies" prefHeight="25.0" prefWidth="114.0" text="Kopiraj" GridPane.columnIndex="1" GridPane.halignment="RIGHT">
+                                 <GridPane.margin>
+                                    <Insets />
+                                 </GridPane.margin>
+                              </Button>
+                           </children>
+                        </GridPane>
                      </children>
                      <GridPane.margin>
                         <Insets left="5.0" />
