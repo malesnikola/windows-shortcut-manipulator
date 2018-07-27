@@ -29,6 +29,7 @@ import main.java.enums.ShortcutActionState;
 import main.java.enums.WindowsShortcutModelState;
 import main.java.model.WindowsShortcutModel;
 import main.java.util.Constants;
+import main.java.util.FileUtil;
 import main.java.util.TimeUtil;
 import main.java.workers.*;
 import org.apache.log4j.Logger;
@@ -544,7 +545,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
             return;
         }
 
-        if (!windowsShortcutModel.ifFolderIsValid(newParents)) {
+        if (!FileUtil.ifFolderIsValid(newParents)) {
             Alert alert = getAlertDialog(Alert.AlertType.ERROR, getLocalizedString("change.parents.title.text"), "", getLocalizedString("error.bad.format.for.new..parents"), ButtonType.OK);
             alert.showAndWait();
             return;
@@ -592,7 +593,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         }
 
         String destinationPath = directoryForCopiesTextField.getText();
-        if (!windowsShortcutModel.ifFolderIsValid(destinationPath)) {
+        if (!FileUtil.ifFolderIsValid(destinationPath)) {
             Alert alert = getAlertDialog(Alert.AlertType.ERROR, getLocalizedString("create.copies.title.text"), "", getLocalizedString("error.bad.destination.folder"), ButtonType.OK);
             alert.showAndWait();
             return;
@@ -803,7 +804,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
     }
 
     @Override
-    public void onCheckedCopies() {
+    public void onCheckedDuplicates() {
         Platform.runLater(() -> {
             if (windowsShortcutModel.ifSomeFilesAreDuplicates()) {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/dialog_remove_copies.fxml"));

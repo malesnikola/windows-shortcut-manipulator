@@ -40,4 +40,14 @@ public class FileUtil {
         }
     }
 
+    /**
+     * Check if forwarded path representing valid existing folder.
+     * @param folderPath Folder path.
+     * @return True if path represent valid existing folder, otherwise false.
+     */
+    public static boolean ifFolderIsValid(String folderPath) {
+        File file = new File(folderPath);
+        return file.isDirectory();
+    }
+
 }

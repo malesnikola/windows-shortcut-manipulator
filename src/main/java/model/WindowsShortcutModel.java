@@ -132,13 +132,21 @@ public class WindowsShortcutModel {
         return lastModelState;
     }
 
+    /**
+     * Recursively populate actualFiles from originalFiles.
+     * @param originalFiles Contains list of all files and folders which user selected.
+     * @param actualFiles At the end of method, this list will contain all files which user selected
+     *                    and all files which are underneath selected folders.
+     */
     private void populateListWithActualFiles(List<File> originalFiles, List<File> actualFiles) {
         for (File originalFile : originalFiles) {
             if (originalFile.isDirectory()) {
+                // get all children in folder and recursively call same method
                 File[] childrenFiles = originalFile.listFiles();
                 populateListWithActualFiles(Arrays.asList(childrenFiles), actualFiles);
             }
             else {
+                // add actual file
                 actualFiles.add(originalFile);
             }
         }
@@ -159,6 +167,7 @@ public class WindowsShortcutModel {
             AtomicInteger progress = new AtomicInteger();
 
             List<File> actualFiles = new LinkedList<>();
+            // get all files which user selected and all files which are underneath selected folders
             populateListWithActualFiles(files, actualFiles);
 
             actualFiles.stream().forEach(file -> {
@@ -181,7 +190,7 @@ public class WindowsShortcutModel {
                 }
             });
 
-            if (previousSizeOfImportedFiles != importedFiles.size() || !lastFailedLoadingFiles.isEmpty()) {
+            if ((previousSizeOfImportedFiles != importedFiles.size()) || !lastFailedLoadingFiles.isEmpty()) {
                 // notify shortcutObservers if at least one file is imported, or at list one file cannot be imported
                 shortcutObservers.forEach(WindowsShortcutObserver::onImportedFilesChanged);
             }
@@ -189,7 +198,7 @@ public class WindowsShortcutModel {
     }
 
     /**
-     * Remove imported files.
+     * Remove imported files (only from software, not form disk).
      * @param filePaths List of ".lnk" file paths which has to be removed.
      */
     public void removeImportedFiles(List<String> filePaths) {
@@ -209,6 +218,10 @@ public class WindowsShortcutModel {
         }
     }
 
+    /**
+     * Check availability of all imported files.
+     * @param worker Worker which is bounded with progress form.
+     */
     public void checkAvailability(CheckAvailabilityWorker worker) {
         lastModelState = WindowsShortcutModelState.CHECKED_AVAILABILITY;
 
@@ -228,23 +241,32 @@ public class WindowsShortcutModel {
         }
     }
 
+    /**
+     * Check if there are some files which targeting the same original file.
+     * @param worker Worker which is bounded with progress form.
+     */
     public void checkDuplicates(CheckDuplicatesWorker worker) {
         lastModelState = WindowsShortcutModelState.CHECKED_DUPLICATES;
 
-        duplicateFiles.clear();
-        Map<String, String> foundTargetFiles = new HashMap<>();
-        Set<String> foundedTargetPaths = new HashSet();
+        duplicateFiles.clear();     // clear duplicate files
+        Map<String, String> foundTargetFiles = new HashMap<>(); // key = original file path; value = shortcut file path
+        Set<String> foundedTargetPaths = new HashSet();         // set of original (targeting) file paths
         AtomicInteger progress = new AtomicInteger();
         for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
             String originalFilePath = shortcut.getTargetFilePath();
             String shortcutFilePath = shortcut.getFilePath();
 
             if (foundTargetFiles.containsKey(originalFilePath)){
+                // if we already had found originalFilePath, that means that this is duplicate
+                // add this duplicate to the duplicateFiles
                 duplicateFiles.put(shortcutFilePath, originalFilePath);
                 if (foundedTargetPaths.add(originalFilePath)) {
+                    // if this is the first duplicate (secondly found file with originalFilePath)
+                    //  add firstly found file with same originalFilePath into duplicateFiles
                     duplicateFiles.put(foundTargetFiles.get(originalFilePath), originalFilePath);
                 }
             } else {
+                // if originalFilePath is found for the first time just add originalFilePath and shortcutFilePath in map
                 foundTargetFiles.put(originalFilePath, shortcutFilePath);
             }
 
@@ -253,9 +275,31 @@ public class WindowsShortcutModel {
             }
         }
 
-        shortcutObservers.forEach(WindowsShortcutObserver::onCheckedCopies);
+        shortcutObservers.forEach(WindowsShortcutObserver::onCheckedDuplicates);
     }
 
+    /**
+     * Try to remove file from disk.
+     * @param filePath File path.
+     * @return True if file was removed, otherwise false.
+     */
+    private boolean tryToRemoveFile(String filePath) {
+        File fileForRemove = new File(filePath);
+        if (!fileForRemove.exists()) {
+            lastFailedRemovedFiles.add(new FailedFileDetails(filePath, "It doesn't exist in the first place."));
+            return false;
+        } else if (!fileForRemove.delete()) {
+            lastFailedRemovedFiles.add(new FailedFileDetails(filePath, "File couldn't be deleted."));
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Remove selected shortcut files (from software and from disk) which is duplicates.
+     * @param filePaths List of shortcuts file path.
+     */
     public void removeDuplicateFiles(List<String> filePaths) {
         lastFailedRemovedFiles.clear();
 
@@ -269,25 +313,36 @@ public class WindowsShortcutModel {
         manipulationWithDuplicatesObservers.forEach(ManipulationWithDuplicatesObserver::onRemovedDuplicates);
     }
 
+    /**
+     * When manipulation with duplicates is finished, update last model state to REMOVED_DUPLICATES which means that last user action was removing duplicates.
+     */
     public void finishRemoveDuplicates() {
         lastModelState = WindowsShortcutModelState.REMOVED_DUPLICATES;
     }
 
+    /**
+     * Get list of parent folders sorted by hierarchy in system, which exist in paths for all imported files.
+     * @param ifCheckingTargetPaths True if we checking paths of original (targeting) files; false if we checking paths of shortcut files.
+     * @return List of parent folders sorted by hierarchy in system.
+     */
     public List<String> getMinimumMatchingParents(boolean ifCheckingTargetPaths) {
         List<String> response = new LinkedList<>();
         for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
             String path = (ifCheckingTargetPaths ? shortcut.getTargetFilePath() : shortcut.getFilePath());
             String patternSeparator = Pattern.quote(System.getProperty("file.separator"));
-            String[] splittedPath = path.split(patternSeparator);
+            String[] splittedPath = path.split(patternSeparator);   // contains array of all parent folders (sorted by hierarchy) and file name
 
             if (response.isEmpty()) {
+                // add all parents of first file without file name
                 response = new LinkedList<String>(Arrays.asList(splittedPath));
                 response.remove(response.size() - 1);
             } else {
                 Iterator<String> iterator = response.iterator();
+                // check does every parent of current file exist in minimum matching parents
                 for (int cnt = 0; (cnt < splittedPath.length) && iterator.hasNext(); cnt++) {
                     String parent = iterator.next();
                     if (!splittedPath[cnt].equals(parent)) {
+                        // if current parent is different, remove this parent all his children
                         iterator.remove();
                         while (iterator.hasNext()) {
                             iterator.next();
@@ -298,6 +353,7 @@ public class WindowsShortcutModel {
                     }
                 }
 
+                // if at this point (when we visit at least two files) there is no matching parents we can return empty list.
                 if (response.isEmpty()) {
                     return response;
                 }
@@ -307,11 +363,13 @@ public class WindowsShortcutModel {
         return response;
     }
 
-    public boolean ifFolderIsValid(String folderPath) {
-        File file = new File(folderPath);
-        return file.isDirectory();
-    }
-
+    /**
+     * Replace beginning old parents (folders) in path with new parents.
+     * @param path Old file path.
+     * @param oldParents Beginning old parents which have to be changed with new parents.
+     * @param newParents New parents.
+     * @return New path which present old path where beginning old parents is replaced with the new once.
+     */
     private String replaceBeginningPath(String path, String oldParents, String newParents) {
         String fileSeparator = System.getProperty("file.separator");
         String patternSeparator = Pattern.quote(fileSeparator);
@@ -319,18 +377,26 @@ public class WindowsShortcutModel {
         String[] splittedOldParents = oldParents.split(patternSeparator);
         String[] splittedNewParents = newParents.split(patternSeparator);
         StringBuilder sb = new StringBuilder();
+        // first part of the new path is contained of new parents
         for (int i = 0; i < splittedNewParents.length; i++) {
             sb.append(splittedNewParents[i] + fileSeparator);
         }
 
+        // second part starts from folder which is children of last parent in oldParents
         for(int i = splittedOldParents.length; i < splittedPath.length; i++) {
             sb.append(splittedPath[i] + fileSeparator);
         }
 
-        sb.deleteCharAt(sb.length() - 1); // delete last '\'
+        sb.deleteCharAt(sb.length() - 1); // delete last file separator
         return sb.toString();
     }
 
+    /**
+     * Change original (targeting) file path parents in all imported shortcut files.
+     * @param oldParents Beginning old parents which have to be changed with new parents.
+     * @param newParents New parents.
+     * @param worker Worker which is bounded with progress form.
+     */
     public void changeParents(String oldParents, String newParents, ChangeParentsWorker worker) {
         lastFailedSavedFiles.clear();
 
@@ -339,13 +405,13 @@ public class WindowsShortcutModel {
         AtomicInteger progress = new AtomicInteger();
 
         for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
-            String originalFilePath = replaceBeginningPath(shortcut.getTargetFilePath(), oldParents, newParents);
-            String shortcutPath = shortcut.getFilePath();
+            String originalFilePath = replaceBeginningPath(shortcut.getTargetFilePath(), oldParents, newParents);   // new original (targeting) file
+            String shortcutPath = shortcut.getFilePath();   // shortcut path is the same as before
 
             try {
-                ShellLink.createLink(originalFilePath, shortcutPath);
+                ShellLink.createLink(originalFilePath, shortcutPath);   // create new shortcut on disk and override existing one
                 shortcut.setTargetFilePath(originalFilePath);
-                shortcut.setShortcutActionState(ShortcutActionState.MODIFIED);
+                shortcut.setShortcutActionState(ShortcutActionState.MODIFIED);  // change last action on file
             } catch (IOException e) {
                 shortcut.setShortcutActionState(ShortcutActionState.FAILED_MODIFIED);
                 lastFailedSavedFiles.add(new FailedFileDetails(shortcutPath, e.getMessage()));
@@ -360,10 +426,22 @@ public class WindowsShortcutModel {
         shortcutObservers.forEach(o -> o.onChangedRoot());
     }
 
+    /**
+     * Remove " - Shortcut.lnk" from file name for creating real copy of file.
+     * @param fileName File name.
+     * @return File name without " - Shortcut.lnk".
+     */
     private String fixShortcutFileName(String fileName) {
         return fileName.replaceAll(" - Shortcut.lnk", "");
     }
 
+    /**
+     * Get saving destination for forwarded shortcut file for saving real copy of original file.
+     * @param shortcut Shortcut file.
+     * @param commonPathForSaving Common folder for saving all real copies of original files.
+     * @param minimumParentPath Same shortcut path parents of all imported shortcut files.
+     * @return
+     */
     private String getSavingDestinationForFile(WindowsShortcutWrapper shortcut, String commonPathForSaving, List<String> minimumParentPath) {
         String fileSeparator = System.getProperty("file.separator");
         String shortcutPath = shortcut.getFilePath();
@@ -389,6 +467,12 @@ public class WindowsShortcutModel {
         return commonPathForSaving + fileSeparator + newFileName;
     }
 
+    /**
+     * Create real copies of original files.
+     * @param commonPathForSaving Common folder for saving all files.
+     * @param ifSaveHierarchy True if at the destination folder for saving we keep folder hierarchy as shortcut files, otherwise false.
+     * @param worker Worker which is bounded with progress form.
+     */
     public void copyTargetFiles(String commonPathForSaving, boolean ifSaveHierarchy, CreateCopiesWorker worker) {
         lastFailedSavedFiles.clear();
 
@@ -399,11 +483,11 @@ public class WindowsShortcutModel {
 
         for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
             String originalFilePath = shortcut.getTargetFilePath();
-            String pathForSaving = getSavingDestinationForFile(shortcut, commonPathForSaving, minimumParentPath);
+            String pathForSaving = getSavingDestinationForFile(shortcut, commonPathForSaving, minimumParentPath);   // get path for saving
 
             try {
-                Files.copy(Paths.get(originalFilePath), Paths.get(pathForSaving), StandardCopyOption.REPLACE_EXISTING);
-                shortcut.setShortcutActionState(ShortcutActionState.SAVED);
+                Files.copy(Paths.get(originalFilePath), Paths.get(pathForSaving), StandardCopyOption.REPLACE_EXISTING); // save real copy of original file
+                shortcut.setShortcutActionState(ShortcutActionState.SAVED); // change last action
             } catch (Exception e) {
                 shortcut.setShortcutActionState(ShortcutActionState.FAILED_SAVED);
                 lastFailedSavedFiles.add(new FailedFileDetails(shortcut.getFilePath(), e.getMessage()));
@@ -416,19 +500,6 @@ public class WindowsShortcutModel {
         }
 
         shortcutObservers.forEach(o -> o.onCreateCopies());
-    }
-
-    private boolean tryToRemoveFile(String filePath) {
-        File fileForRemove = new File(filePath);
-        if (!fileForRemove.exists()) {
-            lastFailedRemovedFiles.add(new FailedFileDetails(filePath, "It doesn't exist in the first place."));
-            return false;
-        } else if (!fileForRemove.delete()) {
-            lastFailedRemovedFiles.add(new FailedFileDetails(filePath, "File couldn't be deleted."));
-            return false;
-        }
-
-        return true;
     }
 
     public void registerWindowsShortcutObserver(WindowsShortcutObserver observer) {
@@ -452,7 +523,7 @@ public class WindowsShortcutModel {
 
         void onCheckedAvailability();
 
-        void onCheckedCopies();
+        void onCheckedDuplicates();
 
         void onChangedRoot();
 
