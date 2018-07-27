@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import main.java.controllers.MainScreenController;
+import main.java.model.WindowsShortcutModel;
 import org.apache.log4j.BasicConfigurator;
 
 public class Main extends Application {
@@ -19,6 +20,7 @@ public class Main extends Application {
         BasicConfigurator.configure();
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/screen_main.fxml"));
         rootNode = loader.load();
+        WindowsShortcutModel.getInstance(); // prevent synchronization problem
         mainScreenController = loader.getController();
     }
 

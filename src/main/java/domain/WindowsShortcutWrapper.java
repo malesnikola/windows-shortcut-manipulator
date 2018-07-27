@@ -1,6 +1,5 @@
 package main.java.domain;
 
-import main.java.enums.FileSizeUnit;
 import main.java.enums.FileState;
 import main.java.enums.ShortcutActionState;
 import main.java.mslinks.mslinks.ShellLink;
@@ -29,7 +28,7 @@ public class WindowsShortcutWrapper {
         this.targetFilePath = shellLink.getLinkInfo().getLocalBasePath();
         this.filePath = file.getPath();
         this.fileName = file.getName();
-        checkAvailabilityAndSize();
+        updateAvailabilityAndSize();
         shortcutActionState = ShortcutActionState.NONE;
         // little hack (worked previously when I used WindowsShortcut class):
         //  because my file names is serbian latin (best charset for that is "windows-1250"),
@@ -44,7 +43,7 @@ public class WindowsShortcutWrapper {
         this(new File(filePath));
     }
 
-    public void checkAvailabilityAndSize() {
+    public void updateAvailabilityAndSize() {
         File targetFile = new File(targetFilePath);
         fileState = FileUtil.getFileState(targetFile);
         fileSize = FileSize.getFileSize(targetFile);

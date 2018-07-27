@@ -4,8 +4,10 @@ import main.java.enums.FileState;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Dictionary;
 
+/**
+ * Util class for manipulation with files.
+ */
 public class FileUtil {
     private FileUtil() {
         // prevent instantiation
@@ -15,6 +17,11 @@ public class FileUtil {
         return getFileState(new File(filePath));
     }
 
+    /**
+     * Get state of file. I.e. AVAILABLE
+     * @param file Forwarded file.
+     * @return Returns FileState of forwarded file.
+     */
     public static FileState getFileState(File file) {
         if (file.exists()) {
             try {

@@ -1,5 +1,8 @@
 package main.java.enums;
 
+/**
+ * This enum contains all possible units of file size:
+ */
 public enum FileSizeUnit {
     BYTE ("byte"),
     KILOBYTE ("KB"),
@@ -17,8 +20,13 @@ public enum FileSizeUnit {
         return unitText;
     }
 
-    public static final long KILOBYTE_IN_BYTES = 1024;
-    public static final long MEGABYTE_IN_BYTES = 1024 * KILOBYTE_IN_BYTES;
-    public static final long GIGABYTE_IN_BYTES = 1024 * MEGABYTE_IN_BYTES;
-    public static final long TERABYTE_IN_BYTES = 1024 * GIGABYTE_IN_BYTES;
+    @Override
+    public String toString() {
+        return unitText;
+    }
+
+    public static final long ONE_KILOBYTE_IN_BYTES = 1024;
+    public static final long ONE_MEGABYTE_IN_BYTES = 1024 * ONE_KILOBYTE_IN_BYTES;
+    public static final long ONE_GIGABYTE_IN_BYTES = 1024 * ONE_MEGABYTE_IN_BYTES;
+    public static final long ONE_TERABYTE_IN_BYTES = 1024 * ONE_GIGABYTE_IN_BYTES;
 }

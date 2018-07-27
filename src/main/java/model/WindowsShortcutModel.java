@@ -2,7 +2,6 @@ package main.java.model;
 
 import main.java.domain.FailedFileDetails;
 import main.java.domain.WindowsShortcutWrapper;
-import main.java.enums.FileState;
 import main.java.enums.ShortcutActionState;
 import main.java.enums.WindowsShortcutModelState;
 import main.java.mslinks.mslinks.ShellLink;
@@ -28,7 +27,7 @@ public class WindowsShortcutModel {
     private static WindowsShortcutModel windowsShortcutModel;
 
     /**
-     * Last model state represent last executed action (e.g. "AVAILABLE" for available original files).
+     * Last model state represent last executed action (e.g. "IMPORTED" means that last action was importing files).
      */
     private WindowsShortcutModelState lastModelState = WindowsShortcutModelState.NONE;
 
@@ -57,13 +56,14 @@ public class WindowsShortcutModel {
      */
     private List<FailedFileDetails> lastFailedRemovedFiles = new LinkedList<>();
 
-    private List<String> minimumParentList = new LinkedList<>();
-
     /**
      * Contains set of registered shortcutObservers.
      */
     private Set<WindowsShortcutObserver> shortcutObservers = new HashSet<>();
 
+    /**
+     * Contains set of registered manipulationWithDuplicatesObservers.
+     */
     private Set<ManipulationWithDuplicatesObserver> manipulationWithDuplicatesObservers = new HashSet<>();
 
     public static WindowsShortcutModel getInstance() {
@@ -76,32 +76,56 @@ public class WindowsShortcutModel {
 
     /**
      * Get all imported files.
-     * @return Returns HashMap where key is ".lnk" file path (full file name) and value is Mp3FileWrapper.
+     * @return Returns HashMap where key is ".lnk" file path (full file name) and value is WindowsShortcutWrapper.
      */
     public Map<String, WindowsShortcutWrapper> getImportedFiles() {
         return importedFiles;
     }
 
+    /**
+     * Get all duplicate files.
+     * @return HashMap where key is ".lnk" file path (full file name) and value is WindowsShortcutWrapper.
+     */
     public Map<String, String> getDuplicateFiles() {
         return duplicateFiles;
     }
 
+    /**
+     * Check if exist at least one duplicates.
+     * @return Returns true if exist at least one duplicates, otherwise false.
+     */
     public boolean ifSomeFilesAreDuplicates() {
         return !duplicateFiles.isEmpty();
     }
 
+    /**
+     * Get list of last failed loaded files.
+     * @return List of FailedFileDetails.
+     */
     public List<FailedFileDetails> getLastFailedLoadingFiles() {
         return lastFailedLoadingFiles;
     }
 
+    /**
+     * Get list of last failed saved files.
+     * @return List of FailedFileDetails.
+     */
     public List<FailedFileDetails> getLastFailedSavedFiles() {
         return lastFailedSavedFiles;
     }
 
+    /**
+     * Get list of last failed removed files.
+     * @return List of FailedFileDetails.
+     */
     public List<FailedFileDetails> getLastFailedRemovedFiles() {
         return lastFailedRemovedFiles;
     }
 
+    /**
+     * Check if last removing files (duplicate files) action has any failure.
+     * @return Returns true if at least one file didn't successfully removed, otherwise false.
+     */
     public boolean ifSomeFilesFailedRemoved() { return !lastFailedRemovedFiles.isEmpty(); }
 
     public WindowsShortcutModelState getLastModelState() {
@@ -191,7 +215,7 @@ public class WindowsShortcutModel {
         AtomicInteger progress = new AtomicInteger();
 
         for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
-            shortcut.checkAvailabilityAndSize();
+            shortcut.updateAvailabilityAndSize();
 
             if (worker != null) {
                 worker.updateProgress(progress.incrementAndGet(), importedFiles.size());
