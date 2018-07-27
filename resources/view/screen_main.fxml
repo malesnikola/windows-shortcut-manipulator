@@ -207,7 +207,7 @@
                               <Font name="System Bold" size="18.0" />
                            </font>
                         </Label>
-                        <Button fx:id="changeParentsButton" mnemonicParsing="false" onAction="#changeRoots" prefHeight="25.0" prefWidth="114.0" text="Change" textFill="BLUE" GridPane.halignment="CENTER" GridPane.rowIndex="3">
+                        <Button fx:id="changeParentsButton" mnemonicParsing="false" onAction="#changeParents" prefHeight="25.0" prefWidth="114.0" text="Change" textFill="BLUE" GridPane.halignment="CENTER" GridPane.rowIndex="3">
                            <font>
                               <Font name="System Bold" size="12.0" />
                            </font></Button>

@@ -276,22 +276,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
                         super.updateItem(item, empty);
                         if (!isEmpty()) {
                             FileState state = FileState.fromString(item);
-
-                            switch (state) {
-                                case UNKNOWN:
-                                    this.setTextFill(Color.BLACK);
-                                    break;
-                                case AVAILABLE:
-                                    this.setTextFill(Color.GREEN);
-                                    break;
-                                case CASE_SENSITIVE:
-                                    this.setTextFill(Color.BLUE);
-                                    break;
-                                case UNAVAILABLE:
-                                    this.setTextFill(Color.RED);
-                                    break;
-                            }
-
+                            this.setTextFill(state.getColor());
                             setText(item);
                             this.setStyle("-fx-alignment: CENTER;");
                         } else {
@@ -306,7 +291,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         actionColumn.setPrefWidth(100);
         actionColumn.setCellValueFactory(new PropertyValueFactory<WindowsShortcutDetails,String>("lastAction"));
 
-        // add cell factory for coloring states:
+        // add cell factory for coloring last actions:
         //   To obtain the TableCell we need to replace the Default CellFactory with one that returns a new TableCell instance,
         //   and @Override the updateItem(String item, boolean empty) method.
         actionColumn.setCellFactory(new Callback<TableColumn, TableCell>() {
@@ -318,25 +303,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
                         super.updateItem(item, empty);
                         if (!isEmpty()) {
                             ShortcutActionState state = ShortcutActionState.fromString(item);
-
-                            switch (state) {
-                                case NONE:
-                                    this.setTextFill(Color.BLACK);
-                                    break;
-                                case SAVED:
-                                    this.setTextFill(Color.GREEN);
-                                    break;
-                                case MODIFIED:
-                                    this.setTextFill(Color.BLUE);
-                                    break;
-                                case FAILED_MODIFIED:
-                                    this.setTextFill(Color.RED);
-                                    break;
-                                case FAILED_SAVED:
-                                    this.setTextFill(Color.RED);
-                                    break;
-                            }
-
+                            this.setTextFill(state.getColor());
                             setText(item);
                             this.setStyle("-fx-alignment: CENTER;");
                         } else {
@@ -351,9 +318,14 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         tableView.getColumns().addAll(availabilityColumn, actionColumn);
     }
 
-    private void setDropdownParentList() {
+    /**
+     * Update list of parents which exist in path of all shortcut files.
+     */
+    private void updateDropdownParentList() {
+        // get list of parents (folders in path) in hierarchy order which exist in path of all inserted files
         List<String> parents = windowsShortcutModel.getMinimumMatchingParents(true);
         ObservableList<String> choiceBoxData = FXCollections.observableArrayList();
+        // add all absolute paths based on parents
         if (!parents.isEmpty()) {
             StringBuilder sb = new StringBuilder();
             for (String parent : parents) {
@@ -362,7 +334,9 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
             }
         }
 
+        // clear new parent paths field
         newParentsTextField.clear();
+        // set new parents
         ChooseParentsChoiceBox.setItems(choiceBoxData);
     }
 
@@ -488,6 +462,9 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         }
     }
 
+    /**
+     * Check availability for original files of all imported files.
+     */
     public void checkAvailability() {
         ProgressForm progressForm = new ProgressForm(scene);
 
@@ -506,6 +483,9 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         new Thread(checkAvailabilityWorker).start();
     }
 
+    /**
+     * Check if any inserted file has same original (targeting) file as any other inserted file.
+     */
     public void checkDuplicates() {
         ProgressForm progressForm = new ProgressForm(scene);
 
@@ -524,6 +504,15 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         new Thread(checkDuplicatesWorker).start();
     }
 
+    /**
+     * Get alert dialog with error information.
+     * @param type AlertType - for example Warning or Error...
+     * @param titleText Title text on dialog.
+     * @param headerText Header text of dialog.
+     * @param text Main text on dialog.
+     * @param buttonType Array of buttons which will be presented on dialog.
+     * @return New Alert dialog.
+     */
     private Alert getAlertDialog(Alert.AlertType type, String titleText, String headerText, String text, ButtonType... buttonType) {
         Alert alert = new Alert(type, text, buttonType);
         alert.setHeaderText(headerText);
@@ -537,9 +526,13 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         return alert;
     }
 
-    public void changeRoots() {
-        String oldParents = ChooseParentsChoiceBox.getValue();
-        String newParents = newParentsTextField.getText();
+    /**
+     * Change parents of all imported shortcut files.
+     */
+    public void changeParents() {
+        String oldParents = ChooseParentsChoiceBox.getValue(); // get selected old parents (part of shortcut path)
+        String newParents = newParentsTextField.getText();  // get selected new parents
+        // check conditions
         if (oldParents == null || oldParents.isEmpty() || oldParents.equals("")) {
             Alert alert = getAlertDialog(Alert.AlertType.ERROR, getLocalizedString("change.parents.title.text"), "", getLocalizedString("error.please.select.parents"), ButtonType.OK);
             alert.showAndWait();
@@ -558,6 +551,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
             return;
         }
 
+        // prompt warning if user really want to change parent path
         Alert alert = getAlertDialog(Alert.AlertType.CONFIRMATION, getLocalizedString("warning"), "", getLocalizedString("warning.are.you.sure.you.waant.to.change.parents"), ButtonType.YES, ButtonType.NO);
         alert.showAndWait();
         if (alert.getResult() == ButtonType.NO) {
@@ -788,7 +782,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
     @Override
     public void onImportedFilesChanged() {
         Platform.runLater(() -> {
-            setDropdownParentList();
+            updateDropdownParentList();
             updateTable();
             addInfoOnConsole();
         });
@@ -832,7 +826,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
     @Override
     public void onChangedRoot() {
         Platform.runLater(() -> {
-            setDropdownParentList();
+            updateDropdownParentList();
             updateTable();
             addInfoOnConsole();
         });
