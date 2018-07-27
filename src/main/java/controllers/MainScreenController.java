@@ -29,12 +29,16 @@ import main.java.enums.ShortcutActionState;
 import main.java.enums.WindowsShortcutModelState;
 import main.java.model.WindowsShortcutModel;
 import main.java.util.Constants;
+import main.java.util.TimeUtil;
 import main.java.workers.*;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class MainScreenController implements WindowsShortcutModel.WindowsShortcutObserver {
@@ -485,6 +489,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
 
     /**
      * Check if any inserted file has same original (targeting) file as any other inserted file.
+     * If there is a duplicates, new dialog with duplicates will po up, otherwise message will be shown in console that there is no duplicates.
      */
     public void checkDuplicates() {
         ProgressForm progressForm = new ProgressForm(scene);
@@ -575,7 +580,11 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         new Thread(checkDuplicatesWorker).start();
     }
 
+    /**
+     * Create copies of original (targeting) files
+     */
     public void createCopies() {
+        // check conditions
         if (tableData == null || tableData.isEmpty()) {
             Alert alert = getAlertDialog(Alert.AlertType.ERROR, getLocalizedString("create.copies.title.text"), "", getLocalizedString("no.files.imported"), ButtonType.OK);
             alert.showAndWait();
@@ -589,6 +598,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
             return;
         }
 
+        // prompt warning if user really want to save
         Alert alert = getAlertDialog(Alert.AlertType.CONFIRMATION, getLocalizedString("warning"), "", getLocalizedString("warning.are.you.sure.you.waant.to.create.copies"), ButtonType.YES, ButtonType.NO);
         alert.showAndWait();
         if (alert.getResult() == ButtonType.NO) {
@@ -642,14 +652,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
      * Add localized info on console based on previous user action.
      */
     private void addInfoOnConsole(){
-        // get current time
-        Calendar rightNowCalendar = Calendar.getInstance();
-        int hours = rightNowCalendar.get(Calendar.HOUR_OF_DAY);
-        int minutes = rightNowCalendar.get(Calendar.MINUTE);
-        int seconds = rightNowCalendar.get(Calendar.SECOND);
-        String currentTime = ((hours < 10) ? ("0" + hours) : hours) + ":"
-                + ((minutes < 10) ? ("0" + minutes) : minutes) + ":"
-                + ((seconds < 10) ? ("0" + seconds) : seconds) + " - ";
+        String currentTime = TimeUtil.getCurrentTimeString();
 
         WindowsShortcutModelState lastModelState = windowsShortcutModel.getLastModelState();
         switch (lastModelState) {
@@ -717,14 +720,14 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
     }
 
     /**
-     * Open file chooser dialog and import selected files into mp3Model.
+     * Open file chooser dialog and import selected files into model.
      */
     public void openFiles() {
         FileChooser fileChooser = new FileChooser();
         // set extension filter
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(Constants.LNK_FILE_TYPE_DESCRIPTION, "*" + Constants.LNK_FILE_TYPE_EXTENSION);
         fileChooser.getExtensionFilters().add(extFilter);
-        // Open dialog for choosing mp3 files
+        // Open dialog for choosing shortcut files
         List<File> files = fileChooser.showOpenMultipleDialog(tableView.getScene().getWindow());
         if (files != null) {
             ProgressForm progressForm = new ProgressForm(scene);
@@ -745,7 +748,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
     }
 
     /**
-     * Open directory chooser dialog and import all ".mp3" files from chosen directory into mp3Model.
+     * Open directory chooser dialog and import all ".lnk" files from chosen directory into model.
      */
     public void openFolder() {
         DirectoryChooser directoryChooser = new DirectoryChooser();
@@ -771,6 +774,9 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         }
     }
 
+    /**
+     * Choose folder for saving original (targeting) files copies.
+     */
     public void chooseFolderForSaving() {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         File selectedDirectory = directoryChooser.showDialog(tableView.getScene().getWindow());

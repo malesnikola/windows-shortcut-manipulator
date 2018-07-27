@@ -191,22 +191,7 @@ public class WindowsShortcutModel {
         AtomicInteger progress = new AtomicInteger();
 
         for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
-            String originalFilePath = shortcut.getTargetFilePath();
-            File originalFile = new File(originalFilePath);
-            if (originalFile.exists()) {
-                try {
-                    String caseSensitivePath = originalFile.getCanonicalPath();
-                    if (originalFilePath.equals(caseSensitivePath)) {
-                        shortcut.setFileState(FileState.AVAILABLE);
-                    } else {
-                        shortcut.setFileState(FileState.CASE_SENSITIVE);
-                    }
-                } catch (IOException e) {
-                    shortcut.setFileState(FileState.CASE_SENSITIVE);
-                }
-            } else {
-                shortcut.setFileState(FileState.UNAVAILABLE);
-            }
+            shortcut.checkAvailabilityAndSize();
 
             if (worker != null) {
                 worker.updateProgress(progress.incrementAndGet(), importedFiles.size());

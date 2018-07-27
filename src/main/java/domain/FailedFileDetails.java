@@ -4,8 +4,8 @@ package main.java.domain;
  * Contains information about file and error.
  */
 public class FailedFileDetails {
-    private String filePath;
-    private String errorMessage;
+    private String filePath;        // shortcut file path
+    private String errorMessage;    // error message
 
     /**
      * Create new FailedFileDetails.

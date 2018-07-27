@@ -3,11 +3,14 @@ package main.java.domain;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
+/**
+ * This class is used to hold data for table view.
+ */
 public class WindowsShortcutDetails {
     private final StringProperty shortcutFilePath;      // file path for ".lnk" file
     private final StringProperty originalFilePath;      // file path of original file
-    private final StringProperty availability;
-    private final StringProperty lastAction;
+    private final StringProperty availability;          // availability of file
+    private final StringProperty lastAction;            // last user action on file
 
     private WindowsShortcutDetails(String shortcutFilePath, String originalFilePath, String availability, String lastAction){
         this.shortcutFilePath = new SimpleStringProperty(shortcutFilePath);

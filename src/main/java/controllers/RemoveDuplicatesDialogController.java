@@ -13,7 +13,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.stage.StageStyle;
-import main.java.domain.*;
+import main.java.domain.DuplicateFileDetails;
+import main.java.domain.FailedFileDetails;
 import main.java.model.WindowsShortcutModel;
 import org.apache.log4j.Logger;
 
@@ -140,7 +141,11 @@ public class RemoveDuplicatesDialogController implements WindowsShortcutModel.Ma
         updateTable();
     }
 
-    public void selectAllBoxes(ActionEvent e) {
+    /**
+     * Select all rows in table.
+     * @param e
+     */
+    private void selectAllBoxes(ActionEvent e) {
         // iterate through all items in ObservableList
         for (DuplicateFileDetails item : tableData) {
             // and change "selected" boolean
@@ -148,6 +153,9 @@ public class RemoveDuplicatesDialogController implements WindowsShortcutModel.Ma
         }
     }
 
+    /**
+     * Update table with duplicate files.
+     */
     private void updateTable() {
         Map<String, String> duplicateFiles = windowsShortcutModel.getDuplicateFiles();
         tableData = FXCollections.observableArrayList();
@@ -155,7 +163,7 @@ public class RemoveDuplicatesDialogController implements WindowsShortcutModel.Ma
 
         selectAllCheckBox = new CheckBox();
         selectionColumn.setCellFactory(CheckBoxTableCell.forTableColumn(selectionColumn));
-        selectionColumn.setGraphic(selectAllCheckBox);
+        selectionColumn.setGraphic(selectAllCheckBox);  // add check all as option next to the column name
 
         // select all checkboxes when checkbox in header is pressed
         selectAllCheckBox.setOnAction(e -> selectAllBoxes(e));
@@ -174,6 +182,10 @@ public class RemoveDuplicatesDialogController implements WindowsShortcutModel.Ma
         tableView.sort();
     }
 
+    /**
+     * Get selected files in table.
+     * @return List of selected shortcut paths.
+     */
     private List<String> getSelectedFiles() {
         return tableData.stream()
                 .filter(file -> file.isIsSelected())
@@ -181,6 +193,9 @@ public class RemoveDuplicatesDialogController implements WindowsShortcutModel.Ma
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Remove selected duplicates.
+     */
     public void removeDuplicates() {
         windowsShortcutModel.removeDuplicateFiles(getSelectedFiles());
     }
@@ -188,6 +203,7 @@ public class RemoveDuplicatesDialogController implements WindowsShortcutModel.Ma
     @Override
     public void onRemovedDuplicates() {
         Platform.runLater(() -> {
+            // prompt error message if some files didn't removed.
             if (windowsShortcutModel.ifSomeFilesFailedRemoved()) {
                 List<FailedFileDetails> failedRemovedFiles = windowsShortcutModel.getLastFailedRemovedFiles();
                 String fileSeparator = System.getProperty("line.separator");

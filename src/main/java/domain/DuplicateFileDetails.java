@@ -4,31 +4,23 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.scene.control.CheckBox;
 
+/**
+ * This class is used to hold data for table view.
+ */
 public class DuplicateFileDetails {
     private final StringProperty shortcutFilePath;      // file path for ".lnk" file
     private final StringProperty originalFilePath;      // file path of original file
     private BooleanProperty isSelected;
 
     public DuplicateFileDetails(String shortcutFilePath, String originalFilePath) {
-        this.shortcutFilePath = new SimpleStringProperty(shortcutFilePath);
-        this.originalFilePath = new SimpleStringProperty(originalFilePath);
-        this.isSelected = new SimpleBooleanProperty(false);
+        this(shortcutFilePath, originalFilePath, false);
     }
 
     public DuplicateFileDetails(String shortcutFilePath, String originalFilePath, boolean isSelected) {
         this.shortcutFilePath = new SimpleStringProperty(shortcutFilePath);
         this.originalFilePath = new SimpleStringProperty(originalFilePath);
         this.isSelected = new SimpleBooleanProperty(isSelected);
-    }
-
-    public static DuplicateFileDetails deserialize(DuplicateFileInfo duplicateFileInfo) {
-        return new DuplicateFileDetails(duplicateFileInfo.getShortcutFilePath(), duplicateFileInfo.getOriginalFilePath(), false);
-    }
-
-    public static DuplicateFileDetails deserialize(DuplicateFileInfo duplicateFileInfo, boolean isSelected) {
-        return new DuplicateFileDetails(duplicateFileInfo.getShortcutFilePath(), duplicateFileInfo.getOriginalFilePath(), isSelected);
     }
 
     public String getShortcutFilePath() {

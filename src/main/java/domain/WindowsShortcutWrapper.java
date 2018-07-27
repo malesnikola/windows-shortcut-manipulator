@@ -1,41 +1,53 @@
 package main.java.domain;
 
+import main.java.enums.FileSizeUnit;
 import main.java.enums.FileState;
 import main.java.enums.ShortcutActionState;
 import main.java.mslinks.mslinks.ShellLink;
 import main.java.mslinks.mslinks.ShellLinkException;
+import main.java.util.FileUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 
+/**
+ * This class contains all basic information of shortcut file.
+ */
 public class WindowsShortcutWrapper {
 
-    private ShellLink shellLink;
-    private String fileName;
-    private String filePath;
-    private String targetFilePath;
-    private FileState fileState;
-    private ShortcutActionState shortcutActionState;
+    private ShellLink shellLink;        // helper shell link
+    private String fileName;            // shortcut file name
+    private String filePath;            // shortcut file path
+    private String targetFilePath;      // target file path
+    private FileSize fileSize;          // file size
+    private FileState fileState;        // file state
+    private ShortcutActionState shortcutActionState;    // las user action
 
     public WindowsShortcutWrapper(File file) throws IOException, ParseException, ShellLinkException {
         shellLink = new ShellLink(file);
         this.targetFilePath = shellLink.getLinkInfo().getLocalBasePath();
         this.filePath = file.getPath();
         this.fileName = file.getName();
+        checkAvailabilityAndSize();
         shortcutActionState = ShortcutActionState.NONE;
-        fileState = FileState.UNKNOWN;
-        // little hack:
+        // little hack (worked previously when I used WindowsShortcut class):
         //  because my file names is serbian latin (best charset for that is "windows-1250"),
         //  and some of my last folders begin with 'Ω' (because I always want for them to be at the end).
         //  I couldn't find solution how to read serbian latin character with 'Ω' character, so I manually changed all '?' with 'Ω'
-//        if (real_file.contains("?")) {
-//            real_file = real_file.replaceAll("\\?", "Ω");
-//        }
+        //  if (real_file.contains("?")) {
+        //      real_file = real_file.replaceAll("\\?", "Ω");
+        //  }
     }
 
     public WindowsShortcutWrapper(String filePath) throws IOException, ParseException, ShellLinkException {
         this(new File(filePath));
+    }
+
+    public void checkAvailabilityAndSize() {
+        File targetFile = new File(targetFilePath);
+        fileState = FileUtil.getFileState(targetFile);
+        fileSize = FileSize.getFileSize(targetFile);
     }
 
     public FileState getFileState() {

@@ -26,6 +26,8 @@ import java.text.ParseException;
  *     by Joshua Marinacci and Chris Adamson
  *     ISBN: 0-596-00907-0
  *     http://www.oreilly.com/catalog/swinghks/
+ *
+ * Note: This class was used previously (before I added 'mslinks' package)
  */
 public class WindowsShortcut
 {
