@@ -50,8 +50,8 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
 
     private WindowsShortcutModel windowsShortcutModel;
 
-    private int totalNumberOfImportedFiles;
-    private FileSize freeSpaceOnDisk;
+    private int totalNumberOfImportedFiles; // total number of imported files whose original (targeting) file is available
+    private FileSize freeSpaceOnDisk;       // free space on disk which is selected for saving copies
     private FileSize totalSizeOfFiles;      // total size of all original imported files
 
     private Scene scene;
