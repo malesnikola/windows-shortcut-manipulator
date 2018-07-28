@@ -3,6 +3,7 @@ package main.java.model;
 import main.java.domain.FailedFileDetails;
 import main.java.domain.FileSize;
 import main.java.domain.WindowsShortcutWrapper;
+import main.java.enums.FileState;
 import main.java.enums.ShortcutActionState;
 import main.java.enums.WindowsShortcutModelState;
 import main.java.mslinks.mslinks.ShellLink;
@@ -503,10 +504,21 @@ public class WindowsShortcutModel {
         shortcutObservers.forEach(o -> o.onCreateCopies());
     }
 
-    public int getTotalNumberOfImportedFiles() {
-        return importedFiles.size();
+    /**
+     * Get total number of imported shortcut files whose original (targeting) files are available.
+     * @return Number of available imported files.
+     */
+    public int getTotalNumberOfAvailableImportedFiles() {
+        return (int) importedFiles.values()
+                .stream()
+                .filter(f -> (f.getFileState() == FileState.AVAILABLE) || (f.getFileState() == FileState.CASE_SENSITIVE))
+                .count();
     }
 
+    /**
+     * Get total size of all available original (targeting) files which is imported through shortcut files.
+     * @return Total FileSize of available original files.
+     */
     public FileSize getTotalSizeOfOriginalFiles() {
         long totalSizeInBytes = importedFiles.values().stream()
                 .mapToLong(f -> f.getFileSize().getSizeInBytes())

@@ -10,6 +10,11 @@ import main.java.controllers.MainScreenController;
 import main.java.model.WindowsShortcutModel;
 import org.apache.log4j.BasicConfigurator;
 
+/**
+ * Required settings for IDE (in order to prevent bugs with latinic letters):
+ * Global encoding: windows-1250
+ * Project encoding: windows-1250
+ */
 public class Main extends Application {
     private Parent rootNode;
 

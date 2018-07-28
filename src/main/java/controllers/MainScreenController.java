@@ -226,7 +226,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
      */
     private void updateSizeInfo() {
         // update fields
-        totalNumberOfImportedFiles = windowsShortcutModel.getTotalNumberOfImportedFiles();
+        totalNumberOfImportedFiles = windowsShortcutModel.getTotalNumberOfAvailableImportedFiles();
         totalSizeOfFiles = windowsShortcutModel.getTotalSizeOfOriginalFiles();
         // update labels
         numberOfFilesValueLabel.setText(totalNumberOfImportedFiles + "");
