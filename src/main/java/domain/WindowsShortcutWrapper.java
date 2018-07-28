@@ -19,7 +19,7 @@ public class WindowsShortcutWrapper {
     private String fileName;            // shortcut file name
     private String filePath;            // shortcut file path
     private String targetFilePath;      // target file path
-    private FileSize fileSize;          // file size
+    private FileSize fileSize;          // size of original (targeting) file
     private FileState fileState;        // file state
     private ShortcutActionState shortcutActionState;    // las user action
 
@@ -77,5 +77,9 @@ public class WindowsShortcutWrapper {
 
     public String getFileName() {
         return fileName;
+    }
+
+    public FileSize getFileSize() {
+        return fileSize;
     }
 }

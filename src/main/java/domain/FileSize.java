@@ -9,16 +9,45 @@ import java.io.File;
  * I.e. File with size of 7.5 MB is represented with: size = 7.5 and fileSizeUnit = MEGABYTE
  */
 public class FileSize {
-    private double size;                // size
+    private long sizeInBytes;
+    private double size;                // size in converted unit
     private FileSizeUnit fileSizeUnit;  // unit (i.e. MB)
 
     private FileSize() {
-        this(0, FileSizeUnit.KILOBYTE);
+        this(0, 0, FileSizeUnit.KILOBYTE);
     }
 
-    private FileSize(double size, FileSizeUnit fileSizeUnit) {
+    private FileSize(long sizeInBytes, double size, FileSizeUnit fileSizeUnit) {
+        this.sizeInBytes = sizeInBytes;
         this.size = size;
         this.fileSizeUnit = fileSizeUnit;
+    }
+
+    public long getSizeInBytes() {
+        return sizeInBytes;
+    }
+
+    public double getSize() {
+        return size;
+    }
+
+    public FileSizeUnit getFileSizeUnit() {
+        return fileSizeUnit;
+    }
+
+    @Override
+    public String toString() {
+        String value;
+        // show two decimals for terabytes, one decimal for gigabytes and no decimals for others
+        if (fileSizeUnit == FileSizeUnit.TERABYTE) {
+            value = String.format("%1$,.2f", size);
+        } else if (fileSizeUnit == FileSizeUnit.GIGABYTE) {
+            value = String.format("%1$,.1f", size);
+        } else {
+            value = (int) size + "";
+        }
+
+        return value + " " + fileSizeUnit.toString();
     }
 
     /**
@@ -46,7 +75,7 @@ public class FileSize {
             fileSizeUnit = FileSizeUnit.BYTE;
         }
 
-        return new FileSize(size, fileSizeUnit);
+        return new FileSize(sizeInBytes, size, fileSizeUnit);
     }
 
     /**

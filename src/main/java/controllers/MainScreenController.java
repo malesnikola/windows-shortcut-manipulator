@@ -22,6 +22,7 @@ import javafx.stage.*;
 import javafx.util.Callback;
 import main.java.dialogs.ProgressForm;
 import main.java.domain.FailedFileDetails;
+import main.java.domain.FileSize;
 import main.java.domain.WindowsShortcutDetails;
 import main.java.domain.WindowsShortcutWrapper;
 import main.java.enums.FileState;
@@ -48,6 +49,10 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
     private static ResourceBundle resourceBundle;
 
     private WindowsShortcutModel windowsShortcutModel;
+
+    private int totalNumberOfImportedFiles;
+    private FileSize freeSpaceOnDisk;
+    private FileSize totalSizeOfFiles;      // total size of all original imported files
 
     private Scene scene;
     private String chosenLanguage; // en (English), rs (Serbian)
@@ -120,6 +125,18 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
     @FXML
     private Label directoryLabel;
     @FXML
+    private Label numberOfFilesLabel;
+    @FXML
+    private Label numberOfFilesValueLabel;
+    @FXML
+    private Label freeSpaceOnDiskLabel;
+    @FXML
+    private Label freeSpaceOnDiskValueLabel;
+    @FXML
+    private Label sizeOfFilesLabel;
+    @FXML
+    private Label sizeOfFilesValueLabel;
+    @FXML
     private Label consoleLabel;
 
     // data table
@@ -178,6 +195,9 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         newParentsLabel.setText(getLocalizedString("label.newParents.text"));
         createCopiesLabel.setText(getLocalizedString("label.createCopies.text"));
         directoryLabel.setText(getLocalizedString("label.directory.text"));
+        numberOfFilesLabel.setText(getLocalizedString("label.numberOfFiles.text"));
+        freeSpaceOnDiskLabel.setText(getLocalizedString("label.freeSpaceOnDisk.text"));
+        sizeOfFilesLabel.setText(getLocalizedString("label.sizeOfFIles.text"));
         consoleLabel.setText(getLocalizedString("label.console.text"));
 
         // buttons
@@ -199,6 +219,32 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         originalFilePathColumn.setText(getLocalizedString("table.column.originalFilePath.text"));
         availabilityColumn.setText(getLocalizedString("table.column.availability.text"));
         actionColumn.setText(getLocalizedString("table.column.action.text"));
+    }
+
+    /**
+     * Update fields and labels for total number of imported files and total size of original files.
+     */
+    private void updateSizeInfo() {
+        // update fields
+        totalNumberOfImportedFiles = windowsShortcutModel.getTotalNumberOfImportedFiles();
+        totalSizeOfFiles = windowsShortcutModel.getTotalSizeOfOriginalFiles();
+        // update labels
+        numberOfFilesValueLabel.setText(totalNumberOfImportedFiles + "");
+        sizeOfFilesValueLabel.setText(totalSizeOfFiles.toString());
+    }
+
+    /**
+     * Update field and label for free space on selected disk for creating copies.
+     */
+    private void updateFreeSpaceInfo() {
+        String destinationPath = directoryForCopiesTextField.getText();
+        try {
+            freeSpaceOnDisk = FileSize.getFreeDiskSpace(destinationPath);
+            freeSpaceOnDiskValueLabel.setText(freeSpaceOnDisk.toString());
+        } catch (IllegalAccessException e) {
+            freeSpaceOnDisk = null;
+            freeSpaceOnDiskValueLabel.setText("");
+        }
     }
 
     @FXML
@@ -259,8 +305,15 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         shortcutFilePathColumn.setSortType(TableColumn.SortType.ASCENDING);
         chosenSortingColumn = shortcutFilePathColumn;
 
+        // add listener for every text change on directoryForCopiesTextField
+        directoryForCopiesTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+            updateFreeSpaceInfo();
+        });
+
         initNewTableColumn();
 
+        updateSizeInfo();
+        updateFreeSpaceInfo();
         populateUIWithLocalizedStrings();
     }
 
@@ -599,6 +652,13 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
             return;
         }
 
+        // check if there is enough space on selected disk
+        if (freeSpaceOnDisk.getSizeInBytes() < totalSizeOfFiles.getSizeInBytes()) {
+            Alert alert = getAlertDialog(Alert.AlertType.ERROR, getLocalizedString("create.copies.title.text"), "", getLocalizedString("error.not.enough.space.on.disk"), ButtonType.OK);
+            alert.showAndWait();
+            return;
+        }
+
         // prompt warning if user really want to save
         Alert alert = getAlertDialog(Alert.AlertType.CONFIRMATION, getLocalizedString("warning"), "", getLocalizedString("warning.are.you.sure.you.waant.to.create.copies"), ButtonType.YES, ButtonType.NO);
         alert.showAndWait();
@@ -792,6 +852,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
             updateDropdownParentList();
             updateTable();
             addInfoOnConsole();
+            updateSizeInfo();
         });
     }
 

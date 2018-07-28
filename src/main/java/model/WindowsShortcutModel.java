@@ -1,6 +1,7 @@
 package main.java.model;
 
 import main.java.domain.FailedFileDetails;
+import main.java.domain.FileSize;
 import main.java.domain.WindowsShortcutWrapper;
 import main.java.enums.ShortcutActionState;
 import main.java.enums.WindowsShortcutModelState;
@@ -500,6 +501,18 @@ public class WindowsShortcutModel {
         }
 
         shortcutObservers.forEach(o -> o.onCreateCopies());
+    }
+
+    public int getTotalNumberOfImportedFiles() {
+        return importedFiles.size();
+    }
+
+    public FileSize getTotalSizeOfOriginalFiles() {
+        long totalSizeInBytes = importedFiles.values().stream()
+                .mapToLong(f -> f.getFileSize().getSizeInBytes())
+                .sum();
+
+        return FileSize.fromLong(totalSizeInBytes);
     }
 
     public void registerWindowsShortcutObserver(WindowsShortcutObserver observer) {
