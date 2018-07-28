@@ -420,6 +420,9 @@ public class WindowsShortcutModel {
                 logger.debug("Exception in method changeParents: " + e.getMessage());
             }
 
+            // check does new original (targeting) file is available
+            shortcut.updateAvailabilityAndSize();
+
             if (worker != null) {
                 worker.updateProgress(progress.incrementAndGet(), importedFiles.size());
             }
@@ -491,6 +494,8 @@ public class WindowsShortcutModel {
                 Files.copy(Paths.get(originalFilePath), Paths.get(pathForSaving), StandardCopyOption.REPLACE_EXISTING); // save real copy of original file
                 shortcut.setShortcutActionState(ShortcutActionState.SAVED); // change last action
             } catch (Exception e) {
+                // update availability (maybe wrong availability caused exception)
+                shortcut.updateAvailabilityAndSize();
                 shortcut.setShortcutActionState(ShortcutActionState.FAILED_SAVED);
                 lastFailedSavedFiles.add(new FailedFileDetails(shortcut.getFilePath(), e.getMessage()));
                 logger.debug("Exception in method copyTargetFiles: " + e.getMessage());

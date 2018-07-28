@@ -16,6 +16,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.*;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.*;
@@ -219,6 +220,13 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         originalFilePathColumn.setText(getLocalizedString("table.column.originalFilePath.text"));
         availabilityColumn.setText(getLocalizedString("table.column.availability.text"));
         actionColumn.setText(getLocalizedString("table.column.action.text"));
+
+        // change size of font for checkAvailabilityButton in Serbian language
+        if ("rs".equals(chosenLanguage)) {
+            checkAvailabilityButton.setFont(new Font(11));
+        } else {
+            checkAvailabilityButton.setFont(new Font(12));
+        }
     }
 
     /**
