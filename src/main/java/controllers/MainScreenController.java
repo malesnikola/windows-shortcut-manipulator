@@ -58,7 +58,8 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
     private Scene scene;
     private String chosenLanguage; // en (English), rs (Serbian)
 
-    private TableColumn chosenSortingColumn;
+    private TableColumn chosenSortingColumn1;
+    private TableColumn chosenSortingColumn2;
 
     // menu
     @FXML
@@ -308,13 +309,12 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         // save user selected column for sorting
         tableView.setOnSort(event -> {
             if (tableView.getSortOrder().size() == 1) {
-                chosenSortingColumn = tableView.getSortOrder().get(0);
+                chosenSortingColumn1 = tableView.getSortOrder().get(0);
+                if (tableView.getSortOrder().size() > 1) {
+                    chosenSortingColumn2 = tableView.getSortOrder().get(1);
+                }
             }
         });
-
-        // by default sorting column is file name
-        shortcutFilePathColumn.setSortType(TableColumn.SortType.ASCENDING);
-        chosenSortingColumn = shortcutFilePathColumn;
 
         // add listener for every text change on chooseParentsChoiceBox
         chooseParentsChoiceBox.valueProperty().addListener((observable, oldValue, newValue) -> {
@@ -330,6 +330,12 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         directoryForCopiesTextField.setText("D:" + File.separator + "Copies");
 
         initNewTableColumn();
+
+        // by default sorting column is file name
+        availabilityColumn.setSortType(TableColumn.SortType.DESCENDING);
+        shortcutFilePathColumn.setSortType(TableColumn.SortType.ASCENDING);
+        chosenSortingColumn1 = availabilityColumn;
+        chosenSortingColumn2 = shortcutFilePathColumn;
 
         updateSizeInfo();
         updateFreeSpaceInfo();
@@ -433,7 +439,8 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         tableView.setItems(tableData);
 
         // sort table
-        tableView.getSortOrder().add(chosenSortingColumn);
+        tableView.getSortOrder().add(chosenSortingColumn1);
+        tableView.getSortOrder().add(chosenSortingColumn2);
         tableView.sort();
     }
 
