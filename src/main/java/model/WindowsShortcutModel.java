@@ -494,7 +494,7 @@ public class WindowsShortcutModel {
 
             try {
                 if (shortcut.isFolder()) {
-                    FileUtil.copyFolderWithContents(originalFilePath, pathForSaving);
+                    FileUtil.copyFolderWithContents(originalFilePath, pathForSaving, progress, totalNumberOfFiles, worker);
                 } else {
                     Files.copy(Paths.get(originalFilePath), Paths.get(pathForSaving), StandardCopyOption.REPLACE_EXISTING); // save real copy of original file
                 }
