@@ -158,20 +158,21 @@ public class WindowsShortcutModel {
     /**
      * Import ".lnk" files.
      * @param files List of files.
-     * @param worker Worker which import files and which is bounded with progress form.
+     * @param progress Progress is some worker which is bounded with waiting progress form.
      */
-    public void importFiles(List<File> files, ImportFilesWorker worker) {
+    public void importFiles(List<File> files, Progress progress) {
         if (files != null && !files.isEmpty()) {
             lastModelState = WindowsShortcutModelState.IMPORTED;
 
             int previousSizeOfImportedFiles = importedFiles.size();
             lastFailedLoadingFiles.clear();
 
-            AtomicInteger progress = new AtomicInteger();
-
             List<File> actualFiles = new LinkedList<>();
             // get all files which user selected and all files which are underneath selected folders
             populateListWithActualFiles(files, actualFiles);
+
+            // set total size of task in progress
+            progress.setTotalSizeOfTask(actualFiles.size());
 
             actualFiles.stream().forEach(file -> {
                 String filePath = file.getPath();
@@ -188,9 +189,7 @@ public class WindowsShortcutModel {
                     }
                 }
 
-                if (worker != null) {
-                    worker.updateProgress(progress.incrementAndGet(), actualFiles.size());
-                }
+                progress.updateProgress();
             });
 
             if ((previousSizeOfImportedFiles != importedFiles.size()) || !lastFailedLoadingFiles.isEmpty()) {
@@ -223,19 +222,14 @@ public class WindowsShortcutModel {
 
     /**
      * Check availability of all imported files.
-     * @param worker Worker which is bounded with progress form.
+     * @param progress Progress is some worker which is bounded with waiting progress form.
      */
-    public void checkAvailability(CheckAvailabilityWorker worker) {
+    public void checkAvailability(Progress progress) {
         lastModelState = WindowsShortcutModelState.CHECKED_AVAILABILITY;
-
-        AtomicInteger progress = new AtomicInteger();
 
         for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
             shortcut.updateAvailabilityAndSize();
-
-            if (worker != null) {
-                worker.updateProgress(progress.incrementAndGet(), importedFiles.size());
-            }
+            progress.updateProgress();
         }
 
         if (!importedFiles.isEmpty()) {
@@ -246,15 +240,15 @@ public class WindowsShortcutModel {
 
     /**
      * Check if there are some files which targeting the same original file.
-     * @param worker Worker which is bounded with progress form.
+     * @param progress Progress is some worker which is bounded with waiting progress form.
      */
-    public void checkDuplicates(CheckDuplicatesWorker worker) {
+    public void checkDuplicates(Progress progress) {
         lastModelState = WindowsShortcutModelState.CHECKED_DUPLICATES;
 
         duplicateFiles.clear();     // clear duplicate files
         Map<String, String> foundTargetFiles = new HashMap<>(); // key = original file path; value = shortcut file path
         Set<String> foundedTargetPaths = new HashSet();         // set of original (targeting) file paths
-        AtomicInteger progress = new AtomicInteger();
+
         for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
             String originalFilePath = shortcut.getTargetFilePath();
             String shortcutFilePath = shortcut.getFilePath();
@@ -273,9 +267,7 @@ public class WindowsShortcutModel {
                 foundTargetFiles.put(originalFilePath, shortcutFilePath);
             }
 
-            if (worker != null) {
-                worker.updateProgress(progress.incrementAndGet(), importedFiles.size());
-            }
+            progress.updateProgress();
         }
 
         shortcutObservers.forEach(WindowsShortcutObserver::onCheckedDuplicates);
@@ -398,14 +390,12 @@ public class WindowsShortcutModel {
      * Change original (targeting) file path parents in all imported shortcut files.
      * @param oldParents Beginning old parents which have to be changed with new parents.
      * @param newParents New parents.
-     * @param worker Worker which is bounded with progress form.
+     * @param progress Progress is some worker which is bounded with waiting progress form.
      */
-    public void changeParents(String oldParents, String newParents, ChangeParentsWorker worker) {
+    public void changeParents(String oldParents, String newParents, Progress progress) {
         lastFailedSavedFiles.clear();
 
         lastModelState = WindowsShortcutModelState.CHANGED_ROOTS;
-
-        AtomicInteger progress = new AtomicInteger();
 
         for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
             String originalFilePath = replaceBeginningPath(shortcut.getTargetFilePath(), oldParents, newParents);   // new original (targeting) file
@@ -424,9 +414,7 @@ public class WindowsShortcutModel {
             // check does new original (targeting) file is available
             shortcut.updateAvailabilityAndSize();
 
-            if (worker != null) {
-                worker.updateProgress(progress.incrementAndGet(), importedFiles.size());
-            }
+            progress.updateProgress();
         }
 
         shortcutObservers.forEach(o -> o.onChangedRoot());
@@ -477,14 +465,13 @@ public class WindowsShortcutModel {
      * Create real copies of original files.
      * @param commonPathForSaving Common folder for saving all files.
      * @param ifSaveHierarchy True if at the destination folder for saving we keep folder hierarchy as shortcut files, otherwise false.
-     * @param worker Worker which is bounded with progress form.
+     * @param progress Progress is some worker which is bounded with waiting progress form.
      */
-    public void copyTargetFiles(String commonPathForSaving, boolean ifSaveHierarchy, CreateCopiesWorker worker) {
+    public void copyTargetFiles(String commonPathForSaving, boolean ifSaveHierarchy, Progress progress) {
         lastFailedSavedFiles.clear();
 
         lastModelState = WindowsShortcutModelState.CREATED_COPIES;
 
-        AtomicInteger progress = new AtomicInteger();
         int totalNumberOfFiles = getTotalNumberOfAvailableImportedFiles();
         List<String> minimumParentPath = (ifSaveHierarchy ? getMinimumMatchingParents(false) : null);
 
@@ -494,7 +481,7 @@ public class WindowsShortcutModel {
 
             try {
                 if (shortcut.isFolder()) {
-                    FileUtil.copyFolderWithContents(originalFilePath, pathForSaving, progress, totalNumberOfFiles, worker);
+                    FileUtil.copyFolderWithContents(originalFilePath, pathForSaving, progress);
                 } else {
                     Files.copy(Paths.get(originalFilePath), Paths.get(pathForSaving), StandardCopyOption.REPLACE_EXISTING); // save real copy of original file
                 }
@@ -508,9 +495,7 @@ public class WindowsShortcutModel {
                 logger.debug("Exception in method copyTargetFiles: " + e.getMessage());
             }
 
-            if (worker != null) {
-                worker.updateProgress(progress.incrementAndGet(), totalNumberOfFiles);
-            }
+            progress.updateProgress();
         }
 
         shortcutObservers.forEach(o -> o.onCreateCopies());

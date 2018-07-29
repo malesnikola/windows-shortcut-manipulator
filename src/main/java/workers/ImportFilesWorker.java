@@ -7,23 +7,12 @@ import main.java.model.WindowsShortcutModel;
 import java.io.File;
 import java.util.List;
 
-public class ImportFilesWorker extends Task<Boolean>{
-
-    private WindowsShortcutModel windowsShortcutModel;
-
+public class ImportFilesWorker extends AbstractWorker {
     private List<File> files;
 
-    public ImportFilesWorker(WindowsShortcutModel WindowsShortcutModel, ProgressForm progressForm, List<File> files) {
-        super();
-        this.windowsShortcutModel = WindowsShortcutModel;
+    public ImportFilesWorker(WindowsShortcutModel windowsShortcutModel, ProgressForm progressForm, List<File> files) {
+        super(windowsShortcutModel, progressForm);
         this.files = files;
-        this.setOnCancelled(event -> {
-            progressForm.closeDialogStage();
-        });
-
-        this.setOnSucceeded(event -> {
-            progressForm.closeDialogStage();
-        });
     }
 
     @Override
@@ -31,9 +20,5 @@ public class ImportFilesWorker extends Task<Boolean>{
         windowsShortcutModel.importFiles(files, this);
 
         return true;
-    }
-
-    public void updateProgress(long workDone, long size){
-        super.updateProgress(workDone, size);
     }
 }

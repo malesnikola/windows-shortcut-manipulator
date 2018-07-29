@@ -4,19 +4,9 @@ import javafx.concurrent.Task;
 import main.java.dialogs.ProgressForm;
 import main.java.model.WindowsShortcutModel;
 
-public class CheckDuplicatesWorker extends Task<Boolean> {
-    private WindowsShortcutModel windowsShortcutModel;
-
-    public CheckDuplicatesWorker(WindowsShortcutModel WindowsShortcutModel, ProgressForm progressForm) {
-        super();
-        this.windowsShortcutModel = WindowsShortcutModel;
-        this.setOnCancelled(event -> {
-            progressForm.closeDialogStage();
-        });
-
-        this.setOnSucceeded(event -> {
-            progressForm.closeDialogStage();
-        });
+public class CheckDuplicatesWorker extends AbstractWorker {
+    public CheckDuplicatesWorker(WindowsShortcutModel windowsShortcutModel, ProgressForm progressForm) {
+        super(windowsShortcutModel, progressForm);
     }
 
     @Override
@@ -24,9 +14,5 @@ public class CheckDuplicatesWorker extends Task<Boolean> {
         windowsShortcutModel.checkDuplicates(this);
 
         return true;
-    }
-
-    public void updateProgress(long workDone, long size){
-        super.updateProgress(workDone, size);
     }
 }

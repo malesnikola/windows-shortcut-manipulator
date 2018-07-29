@@ -4,23 +4,14 @@ import javafx.concurrent.Task;
 import main.java.dialogs.ProgressForm;
 import main.java.model.WindowsShortcutModel;
 
-public class ChangeParentsWorker extends Task<Boolean> {
-    private WindowsShortcutModel windowsShortcutModel;
+public class ChangeParentsWorker extends AbstractWorker {
     private String oldParents;
     private String newParents;
 
     public ChangeParentsWorker(WindowsShortcutModel windowsShortcutModel, String oldParent, String newParents, ProgressForm progressForm) {
-        super();
-        this.windowsShortcutModel = windowsShortcutModel;
+        super(windowsShortcutModel, progressForm);
         this.oldParents = oldParent;
         this.newParents = newParents;
-        this.setOnCancelled(event -> {
-            progressForm.closeDialogStage();
-        });
-
-        this.setOnSucceeded(event -> {
-            progressForm.closeDialogStage();
-        });
     }
 
     @Override
@@ -28,9 +19,5 @@ public class ChangeParentsWorker extends Task<Boolean> {
         windowsShortcutModel.changeParents(oldParents, newParents, this);
 
         return true;
-    }
-
-    public void updateProgress(long workDone, long size){
-        super.updateProgress(workDone, size);
     }
 }

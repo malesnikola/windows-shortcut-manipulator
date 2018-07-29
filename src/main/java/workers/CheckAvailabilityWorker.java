@@ -4,19 +4,9 @@ import javafx.concurrent.Task;
 import main.java.dialogs.ProgressForm;
 import main.java.model.WindowsShortcutModel;
 
-public class CheckAvailabilityWorker extends Task<Boolean> {
-    private WindowsShortcutModel windowsShortcutModel;
-
-    public CheckAvailabilityWorker(WindowsShortcutModel WindowsShortcutModel, ProgressForm progressForm) {
-        super();
-        this.windowsShortcutModel = WindowsShortcutModel;
-        this.setOnCancelled(event -> {
-            progressForm.closeDialogStage();
-        });
-
-        this.setOnSucceeded(event -> {
-            progressForm.closeDialogStage();
-        });
+public class CheckAvailabilityWorker extends AbstractWorker {
+    public CheckAvailabilityWorker(WindowsShortcutModel windowsShortcutModel, ProgressForm progressForm) {
+        super(windowsShortcutModel, progressForm);
     }
 
     @Override
@@ -24,9 +14,5 @@ public class CheckAvailabilityWorker extends Task<Boolean> {
         windowsShortcutModel.checkAvailability(this);
 
         return true;
-    }
-
-    public void updateProgress(long workDone, long size){
-        super.updateProgress(workDone, size);
     }
 }
