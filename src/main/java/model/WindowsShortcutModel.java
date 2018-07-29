@@ -7,6 +7,7 @@ import main.java.enums.FileState;
 import main.java.enums.ShortcutActionState;
 import main.java.enums.WindowsShortcutModelState;
 import main.java.mslinks.mslinks.ShellLink;
+import main.java.util.FileUtil;
 import main.java.workers.*;
 import org.apache.log4j.Logger;
 
@@ -484,6 +485,7 @@ public class WindowsShortcutModel {
         lastModelState = WindowsShortcutModelState.CREATED_COPIES;
 
         AtomicInteger progress = new AtomicInteger();
+        int totalNumberOfFiles = getTotalNumberOfAvailableImportedFiles();
         List<String> minimumParentPath = (ifSaveHierarchy ? getMinimumMatchingParents(false) : null);
 
         for (WindowsShortcutWrapper shortcut : importedFiles.values()) {
@@ -491,7 +493,12 @@ public class WindowsShortcutModel {
             String pathForSaving = getSavingDestinationForFile(shortcut, commonPathForSaving, minimumParentPath);   // get path for saving
 
             try {
-                Files.copy(Paths.get(originalFilePath), Paths.get(pathForSaving), StandardCopyOption.REPLACE_EXISTING); // save real copy of original file
+                if (shortcut.isFolder()) {
+                    FileUtil.copyFolderWithContents(originalFilePath, pathForSaving);
+                } else {
+                    Files.copy(Paths.get(originalFilePath), Paths.get(pathForSaving), StandardCopyOption.REPLACE_EXISTING); // save real copy of original file
+                }
+
                 shortcut.setShortcutActionState(ShortcutActionState.SAVED); // change last action
             } catch (Exception e) {
                 // update availability (maybe wrong availability caused exception)
@@ -502,7 +509,7 @@ public class WindowsShortcutModel {
             }
 
             if (worker != null) {
-                worker.updateProgress(progress.incrementAndGet(), importedFiles.size());
+                worker.updateProgress(progress.incrementAndGet(), totalNumberOfFiles);
             }
         }
 
@@ -517,7 +524,8 @@ public class WindowsShortcutModel {
         return (int) importedFiles.values()
                 .stream()
                 .filter(f -> (f.getFileState() == FileState.AVAILABLE) || (f.getFileState() == FileState.CASE_SENSITIVE))
-                .count();
+                .mapToInt(f -> f.getNumberOfFiles())
+                .sum();
     }
 
     /**

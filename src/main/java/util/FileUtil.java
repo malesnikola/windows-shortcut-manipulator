@@ -4,6 +4,9 @@ import main.java.enums.FileState;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 /**
  * Util class for manipulation with files.
@@ -48,6 +51,83 @@ public class FileUtil {
     public static boolean ifFolderIsValid(String folderPath) {
         File file = new File(folderPath);
         return file.isDirectory();
+    }
+
+    /**
+     * Get size of files in bytes.
+     * If forwarded file is real file, this method will return size of that file.
+     * If forwarded file is directory, this method will return sum of all files which are underneath that directory (deep summing).
+     * @param file Forwarded file.
+     * @return Size of files in bytes.
+     */
+    public static long getFileSizeInBytes(File file) {
+        long length = 0;
+        if (file.isDirectory()) {
+            for (File subFile : file.listFiles()) {
+                length += getFileSizeInBytes(subFile);
+            }
+        } else {
+            length += file.length();
+        }
+
+        return length;
+    }
+
+    /**
+     * Get number of files.
+     * If forwarded file is real file, this method will return one.
+     * If forwarded file is directory, this method will return number of files which are underneath that directory (deep counting).
+     * @param file Forwarded file.
+     * @return Total number of files.
+     */
+    public static int getFileCount(File file) {
+        int count = 0;
+        if (file.isDirectory()) {
+            for (File subFile : file.listFiles()) {
+                count += getFileCount(subFile);
+            }
+        } else {
+            count++;
+        }
+
+        return count;
+    }
+
+    /**
+     * Copy folder from sourcePath to destinationPath with all content inside that folder (deep copy)
+     * @param sourcePath Path of source folder.
+     * @param destinationPath Path of destination folder.
+     * @throws IOException
+     */
+    public static void copyFolderWithContents(String sourcePath, String destinationPath) throws IOException {
+        copyFolderWithContents(new File(sourcePath), new File(destinationPath));
+    }
+
+    /**
+     * Copy folder from source directory to destination directory with all content inside that directory (deep copy)
+     * @param source Source directory.
+     * @param destination Destination directory.
+     * @throws IOException
+     */
+    public static void copyFolderWithContents(File source, File destination) throws IOException {
+        if (source.isDirectory())
+        {
+            if (!destination.exists())
+            {
+                destination.mkdirs();
+            }
+
+            String files[] = source.list();
+            for (String file : files)
+            {
+                File srcFile = new File(source, file);
+                File destFile = new File(destination, file);
+
+                copyFolderWithContents(srcFile, destFile);
+            }
+        } else {
+            Files.copy(Paths.get(source.getPath()), Paths.get(destination.getPath()), StandardCopyOption.REPLACE_EXISTING);
+        }
     }
 
 }

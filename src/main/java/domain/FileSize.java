@@ -1,6 +1,7 @@
 package main.java.domain;
 
 import main.java.enums.FileSizeUnit;
+import main.java.util.FileUtil;
 
 import java.io.File;
 
@@ -88,7 +89,7 @@ public class FileSize {
      */
     public static FileSize getFileSize(File file) {
         if (file.exists()) {
-            return fromLong(file.length());
+            return fromLong(FileUtil.getFileSizeInBytes(file));
         } else {
             return new FileSize();
         }

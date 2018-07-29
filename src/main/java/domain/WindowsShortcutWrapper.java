@@ -21,11 +21,14 @@ public class WindowsShortcutWrapper {
     private String targetFilePath;      // target file path
     private FileSize fileSize;          // size of original (targeting) file
     private FileState fileState;        // file state
+    private boolean isFolder;           // indicates if shortcut targeting folder
+    private int numberOfFiles;          // if shortcut targeting folder this field represent how many files exist below this folder, else this field is 1
     private ShortcutActionState shortcutActionState;    // las user action
 
     public WindowsShortcutWrapper(File file) throws IOException, ParseException, ShellLinkException {
         shellLink = new ShellLink(file);
         this.targetFilePath = shellLink.getLinkInfo().getLocalBasePath();
+        isFolder = FileUtil.ifFolderIsValid(this.targetFilePath);
         this.filePath = file.getPath();
         this.fileName = file.getName();
         updateAvailabilityAndSize();
@@ -47,6 +50,7 @@ public class WindowsShortcutWrapper {
         File targetFile = new File(targetFilePath);
         fileState = FileUtil.getFileState(targetFile);
         fileSize = FileSize.getFileSize(targetFile);
+        numberOfFiles = FileUtil.getFileCount(targetFile);
     }
 
     public FileState getFileState() {
@@ -81,5 +85,13 @@ public class WindowsShortcutWrapper {
 
     public FileSize getFileSize() {
         return fileSize;
+    }
+
+    public boolean isFolder() {
+        return isFolder;
+    }
+
+    public int getNumberOfFiles() {
+        return numberOfFiles;
     }
 }
