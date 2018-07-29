@@ -1,14 +1,12 @@
 package main.java.model;
 
 import main.java.domain.FailedFileDetails;
-import main.java.domain.FileSize;
-import main.java.domain.WindowsShortcutWrapper;
 import main.java.enums.FileState;
 import main.java.enums.ShortcutActionState;
 import main.java.enums.WindowsShortcutModelState;
 import main.java.mslinks.mslinks.ShellLink;
 import main.java.util.FileUtil;
-import main.java.workers.*;
+import main.java.workers.Progress;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -18,7 +16,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 public class WindowsShortcutModel {

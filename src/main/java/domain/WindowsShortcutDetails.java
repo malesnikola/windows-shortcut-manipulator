@@ -2,6 +2,7 @@ package main.java.domain;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import main.java.model.WindowsShortcutWrapper;
 
 /**
  * This class is used to hold data for table view.

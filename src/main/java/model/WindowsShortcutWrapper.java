@@ -1,4 +1,4 @@
-package main.java.domain;
+package main.java.model;
 
 import main.java.enums.FileState;
 import main.java.enums.ShortcutActionState;

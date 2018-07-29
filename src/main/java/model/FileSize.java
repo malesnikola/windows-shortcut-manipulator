@@ -1,4 +1,4 @@
-package main.java.domain;
+package main.java.model;
 
 import main.java.enums.FileSizeUnit;
 import main.java.util.FileUtil;
