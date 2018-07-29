@@ -40,11 +40,14 @@ public class FileSize {
         String value;
         // show two decimals for terabytes, one decimal for gigabytes and no decimals for others
         if (fileSizeUnit == FileSizeUnit.TERABYTE) {
+            // round with two decimals
             value = String.format("%1$,.2f", size);
         } else if (fileSizeUnit == FileSizeUnit.GIGABYTE) {
+            // round with one decimal
             value = String.format("%1$,.1f", size);
         } else {
-            value = (int) size + "";
+            // round value and show as integer
+            value = (int) Math.round(size) + "";
         }
 
         return value + " " + fileSizeUnit.toString();

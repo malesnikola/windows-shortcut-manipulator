@@ -945,6 +945,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         Platform.runLater(() -> {
             updateTable();
             addInfoOnConsole();
+            updateFreeSpaceInfo();
         });
     }
 }
