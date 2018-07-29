@@ -179,7 +179,7 @@
                      <children>
                         <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="2">
                            <children>
-                              <ChoiceBox fx:id="ChooseParentsChoiceBox" prefHeight="25.0" prefWidth="231.0">
+                              <ChoiceBox fx:id="chooseParentsChoiceBox" prefHeight="25.0" prefWidth="231.0">
                                  <HBox.margin>
                                     <Insets top="3.0" />
                                  </HBox.margin></ChoiceBox>
@@ -226,7 +226,7 @@
                           </rowConstraints>
                            <children>
                               <TextField fx:id="newParentsTextField" />
-                              <Button mnemonicParsing="false" prefHeight="24.0" prefWidth="24.0" text="..." textFill="BLUE" GridPane.columnIndex="1" GridPane.halignment="LEFT">
+                              <Button fx:id="chooseNewParentsDirectoryButton" mnemonicParsing="false" onAction="#chooseNewParentsFolder" prefHeight="24.0" prefWidth="24.0" text="..." textFill="BLUE" GridPane.columnIndex="1" GridPane.halignment="LEFT">
                                  <GridPane.margin>
                                     <Insets left="3.0" />
                                  </GridPane.margin>

@@ -92,6 +92,8 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
     @FXML
     private Button checkDuplicatesButton;
     @FXML
+    private Button chooseNewParentsDirectoryButton;
+    @FXML
     private Button changeParentsButton;
     @FXML
     private Button chooseDirectoryButton;
@@ -102,7 +104,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
 
     // choice box
     @FXML
-    private ChoiceBox<String> ChooseParentsChoiceBox;
+    private ChoiceBox<String> chooseParentsChoiceBox;
 
     // text field
     @FXML
@@ -204,6 +206,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         // buttons
         checkAvailabilityButton.setText(getLocalizedString("button.checkAvailability.text"));
         checkDuplicatesButton.setText(getLocalizedString("button.checkDuplicates.text"));
+        chooseNewParentsDirectoryButton.setText(getLocalizedString("button.chooseDirectory.text"));
         changeParentsButton.setText(getLocalizedString("button.changeParents.text"));
         chooseDirectoryButton.setText(getLocalizedString("button.chooseDirectory.text"));
         createCopiesButton.setText(getLocalizedString("button.createCopies.text"));
@@ -313,10 +316,18 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         shortcutFilePathColumn.setSortType(TableColumn.SortType.ASCENDING);
         chosenSortingColumn = shortcutFilePathColumn;
 
+        // add listener for every text change on chooseParentsChoiceBox
+        chooseParentsChoiceBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            newParentsTextField.setText(chooseParentsChoiceBox.getValue());
+        });
+
         // add listener for every text change on directoryForCopiesTextField
         directoryForCopiesTextField.textProperty().addListener((observable, oldValue, newValue) -> {
             updateFreeSpaceInfo();
         });
+
+        // set initial directory for saving copies of original files
+        directoryForCopiesTextField.setText("D:" + File.separator + "Copies");
 
         initNewTableColumn();
 
@@ -403,7 +414,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         // clear new parent paths field
         newParentsTextField.clear();
         // set new parents
-        ChooseParentsChoiceBox.setItems(choiceBoxData);
+        chooseParentsChoiceBox.setItems(choiceBoxData);
     }
 
     /**
@@ -597,7 +608,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
      * Change parents of all imported shortcut files.
      */
     public void changeParents() {
-        String oldParents = ChooseParentsChoiceBox.getValue(); // get selected old parents (part of shortcut path)
+        String oldParents = chooseParentsChoiceBox.getValue(); // get selected old parents (part of shortcut path)
         String newParents = newParentsTextField.getText();  // get selected new parents
         // check conditions
         if (oldParents == null || oldParents.isEmpty() || oldParents.equals("")) {
@@ -607,7 +618,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
         }
 
         if (!FileUtil.ifFolderIsValid(newParents)) {
-            Alert alert = getAlertDialog(Alert.AlertType.ERROR, getLocalizedString("change.parents.title.text"), "", getLocalizedString("error.bad.format.for.new..parents"), ButtonType.OK);
+            Alert alert = getAlertDialog(Alert.AlertType.ERROR, getLocalizedString("change.parents.title.text"), "", getLocalizedString("error.bad.destination.folder"), ButtonType.OK);
             alert.showAndWait();
             return;
         }
@@ -848,9 +859,30 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
      */
     public void chooseFolderForSaving() {
         DirectoryChooser directoryChooser = new DirectoryChooser();
+        // set initial directory if user already choose valid folder
+        if (FileUtil.ifFolderIsValid(directoryForCopiesTextField.getText())) {
+            directoryChooser.setInitialDirectory(new File(directoryForCopiesTextField.getText()));
+        }
+
         File selectedDirectory = directoryChooser.showDialog(tableView.getScene().getWindow());
         if (selectedDirectory != null) {
             directoryForCopiesTextField.setText(selectedDirectory.getPath());
+        }
+    }
+
+    /**
+     * Choose new parents folder.
+     */
+    public void chooseNewParentsFolder() {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        // set initial directory if user already choose valid folder
+        if (FileUtil.ifFolderIsValid(newParentsTextField.getText())) {
+            directoryChooser.setInitialDirectory(new File(newParentsTextField.getText()));
+        }
+
+        File selectedDirectory = directoryChooser.showDialog(tableView.getScene().getWindow());
+        if (selectedDirectory != null) {
+            newParentsTextField.setText(selectedDirectory.getPath());
         }
     }
 
