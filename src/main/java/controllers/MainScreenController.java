@@ -935,6 +935,7 @@ public class MainScreenController implements WindowsShortcutModel.WindowsShortcu
             }
 
             addInfoOnConsole();
+            updateSizeInfo();
         });
     }
 
