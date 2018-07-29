@@ -169,19 +169,20 @@
                       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                     </columnConstraints>
                     <rowConstraints>
-                      <RowConstraints maxHeight="46.0" minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
-                        <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="17.0" vgrow="SOMETIMES" />
-                      <RowConstraints maxHeight="39.0" minHeight="10.0" prefHeight="27.0" vgrow="SOMETIMES" />
+                      <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="20.0" minHeight="20.0" prefHeight="20.0" vgrow="SOMETIMES" />
+                      <RowConstraints maxHeight="28.0" minHeight="28.0" prefHeight="28.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="20.0" minHeight="20.0" prefHeight="20.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                       <RowConstraints maxHeight="42.0" minHeight="10.0" prefHeight="42.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
                         <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="2">
                            <children>
-                              <ChoiceBox fx:id="ChooseParentsChoiceBox" prefWidth="150.0" />
-                              <TextField fx:id="newParentsTextField">
+                              <ChoiceBox fx:id="ChooseParentsChoiceBox" prefHeight="25.0" prefWidth="231.0">
                                  <HBox.margin>
-                                    <Insets left="3.0" />
-                                 </HBox.margin></TextField>
+                                    <Insets top="3.0" />
+                                 </HBox.margin></ChoiceBox>
                            </children>
                         </HBox>
                         <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="1">
@@ -191,12 +192,8 @@
                                     <Insets />
                                  </opaqueInsets>
                                  <HBox.margin>
-                                    <Insets left="3.0" />
+                                    <Insets left="3.0" top="5.0" />
                                  </HBox.margin>
-                                 <font>
-                                    <Font name="System Bold" size="12.0" />
-                                 </font></Label>
-                              <Label fx:id="newParentsLabel" text="New parents:" textFill="BLUE">
                                  <font>
                                     <Font name="System Bold" size="12.0" />
                                  </font></Label>
@@ -207,10 +204,35 @@
                               <Font name="System Bold" size="18.0" />
                            </font>
                         </Label>
-                        <Button fx:id="changeParentsButton" mnemonicParsing="false" onAction="#changeParents" prefHeight="25.0" prefWidth="114.0" text="Change" textFill="BLUE" GridPane.halignment="CENTER" GridPane.rowIndex="3">
+                        <Button fx:id="changeParentsButton" mnemonicParsing="false" onAction="#changeParents" prefHeight="25.0" prefWidth="114.0" text="Change" textFill="BLUE" GridPane.halignment="CENTER" GridPane.rowIndex="5">
                            <font>
                               <Font name="System Bold" size="12.0" />
-                           </font></Button>
+                           </font>
+                           <GridPane.margin>
+                              <Insets top="5.0" />
+                           </GridPane.margin></Button>
+                        <Label fx:id="newParentsLabel" text="New parents:" textFill="BLUE" GridPane.rowIndex="3">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <GridPane GridPane.rowIndex="4">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="208.0" minWidth="10.0" prefWidth="203.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="85.0" minWidth="10.0" prefWidth="32.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <TextField fx:id="newParentsTextField" />
+                              <Button mnemonicParsing="false" prefHeight="24.0" prefWidth="24.0" text="..." textFill="BLUE" GridPane.columnIndex="1" GridPane.halignment="LEFT">
+                                 <GridPane.margin>
+                                    <Insets left="3.0" />
+                                 </GridPane.margin>
+                              </Button>
+                           </children>
+                        </GridPane>
                      </children>
                      <GridPane.margin>
                         <Insets right="5.0" />
@@ -221,24 +243,24 @@
                       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                     </columnConstraints>
                     <rowConstraints>
-                      <RowConstraints maxHeight="46.0" minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
-                        <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="17.0" vgrow="SOMETIMES" />
-                      <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints maxHeight="39.0" minHeight="10.0" prefHeight="39.0" vgrow="SOMETIMES" />
-                      <RowConstraints maxHeight="42.0" minHeight="10.0" prefHeight="33.0" vgrow="SOMETIMES" />
+                      <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="20.0" minHeight="20.0" prefHeight="20.0" vgrow="SOMETIMES" />
+                      <RowConstraints maxHeight="28.0" minHeight="28.0" prefHeight="28.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="46.0" minHeight="10.0" prefHeight="46.0" vgrow="SOMETIMES" />
+                      <RowConstraints maxHeight="42.0" minHeight="10.0" prefHeight="42.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
                         <GridPane GridPane.rowIndex="2">
                           <columnConstraints>
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="208.0" minWidth="10.0" prefWidth="201.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="85.0" minWidth="10.0" prefWidth="34.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="208.0" minWidth="10.0" prefWidth="202.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="85.0" minWidth="10.0" prefWidth="28.0" />
                           </columnConstraints>
                           <rowConstraints>
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
                               <TextField fx:id="directoryForCopiesTextField" prefWidth="202.0" />
-                              <Button fx:id="chooseDirectoryButton" mnemonicParsing="false" onAction="#chooseFolderForSaving" text="..." textFill="#008000" GridPane.columnIndex="1">
+                              <Button fx:id="chooseDirectoryButton" mnemonicParsing="false" onAction="#chooseFolderForSaving" prefHeight="24.0" prefWidth="24.0" text="..." textFill="#008000" GridPane.columnIndex="1">
                                  <GridPane.margin>
                                     <Insets left="3.0" />
                                  </GridPane.margin>
@@ -270,10 +292,13 @@
                                  <font>
                                     <Font name="System Bold" size="12.0" />
                                  </font>
+                                 <GridPane.margin>
+                                    <Insets top="6.0" />
+                                 </GridPane.margin>
                               </CheckBox>
                               <Button fx:id="createCopiesButton" mnemonicParsing="false" onAction="#createCopies" prefHeight="25.0" prefWidth="114.0" text="Copy" textFill="#008000" GridPane.columnIndex="1" GridPane.halignment="RIGHT">
                                  <GridPane.margin>
-                                    <Insets />
+                                    <Insets top="6.0" />
                                  </GridPane.margin>
                                  <font>
                                     <Font name="System Bold" size="12.0" />
